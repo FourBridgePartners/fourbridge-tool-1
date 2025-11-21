@@ -1,0 +1,2229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FourBridge Relationship Intelligence System</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #004D4D 0%, #00665C 100%);
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #004D4D 0%, #00564D 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .header h1 {
+            font-size: 42px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            color: #5FC4B8;
+            letter-spacing: 1px;
+        }
+
+        .header p {
+            font-size: 16px;
+            opacity: 0.9;
+            margin-bottom: 25px;
+            color: white;
+            letter-spacing: 0.5px;
+        }
+
+        .tabs {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+
+        .tab {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: 2px solid rgba(255,255,255,0.3);
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 15px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .tab:hover {
+            background: rgba(255,255,255,0.3);
+            transform: translateY(-2px);
+        }
+
+        .tab.active {
+            background: white;
+            color: #004D4D;
+            border-color: white;
+        }
+
+        /* Loading Screen */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 77, 77, 0.95);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            flex-direction: column;
+            color: white;
+        }
+
+        .loading-spinner {
+            width: 60px;
+            height: 60px;
+            border: 5px solid rgba(95, 196, 184, 0.3);
+            border-top-color: #5FC4B8;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .loading-details {
+            font-size: 14px;
+            opacity: 0.8;
+            max-width: 600px;
+            text-align: center;
+            padding: 0 20px;
+        }
+
+        .loading-log {
+            margin-top: 20px;
+            max-width: 700px;
+            max-height: 300px;
+            overflow-y: auto;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 15px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            text-align: left;
+        }
+
+        .log-entry {
+            margin: 4px 0;
+            padding: 4px 0;
+        }
+
+        .log-success { color: #5FC4B8; }
+        .log-warning { color: #ffc107; }
+        .log-error { color: #ff6b6b; }
+        .log-info { color: #e0e0e0; }
+
+        .view {
+            display: none;
+            padding: 30px;
+        }
+
+        .view.active {
+            display: block;
+        }
+
+        .info-tip {
+            background: #e8f5f3;
+            border-left: 4px solid #5FC4B8;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            color: #004D4D;
+        }
+
+        .filter-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .filter-group label {
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            color: #6c757d;
+            margin-bottom: 6px;
+            letter-spacing: 0.5px;
+        }
+
+        input[type="text"], select {
+            padding: 10px 12px;
+            border: 2px solid #dee2e6;
+            border-radius: 6px;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+
+        input[type="text"]:focus, select:focus {
+            outline: none;
+            border-color: #5FC4B8;
+            box-shadow: 0 0 0 3px rgba(95, 196, 184, 0.1);
+        }
+
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .stat {
+            text-align: center;
+            min-width: 120px;
+        }
+
+        .stat-value {
+            font-size: 32px;
+            font-weight: 700;
+            color: #5FC4B8;
+            display: block;
+        }
+
+        .stat-label {
+            font-size: 13px;
+            color: #6c757d;
+            text-transform: uppercase;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            margin-top: 5px;
+        }
+
+        .table-container {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            background: white;
+        }
+
+        thead {
+            background: #2d3748;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        th {
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 12px;
+            letter-spacing: 0.5px;
+            color: white;
+            border-bottom: 2px solid #1a202c;
+            cursor: pointer;
+            user-select: none;
+            white-space: nowrap;
+        }
+
+        th:hover {
+            background: #1a202c;
+        }
+
+        th.sorted-asc::after {
+            content: " ↑";
+            color: #5FC4B8;
+        }
+
+        th.sorted-desc::after {
+            content: " ↓";
+            color: #5FC4B8;
+        }
+
+        td {
+            padding: 15px;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        tbody tr {
+            transition: all 0.2s;
+            background: white;
+        }
+
+        tbody tr:hover {
+            background: #f8f9fa;
+        }
+        
+        .clickable-row {
+            cursor: pointer;
+        }
+        
+        .clickable-row:hover {
+            background: #f0f4f8 !important;
+        }
+        
+        tbody tr:hover td strong {
+            text-decoration: underline;
+            color: #5FC4B8;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            white-space: nowrap;
+        }
+
+        .badge-sfo, .badge-single-family-office {
+            background: #e7f3ff;
+            color: #0066cc;
+        }
+
+        .badge-mfo, .badge-multi-family-office {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .badge-foundation {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .badge-endowment {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .badge-target, .badge-target_prospect {
+            background: #ff6b6b;
+            color: white;
+        }
+
+        .badge-cold, .badge-cold_lead {
+            background: #e9ecef;
+            color: #495057;
+        }
+
+        .badge-past, .badge-past_contact {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.6);
+            z-index: 1000;
+            overflow-y: auto;
+            padding: 20px;
+        }
+
+        .modal-content {
+            background: white;
+            max-width: 900px;
+            margin: 50px auto;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            position: relative;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            background: linear-gradient(135deg, #004D4D 0%, #00564D 100%);
+            color: white;
+            padding: 25px 30px;
+            border-radius: 12px 12px 0 0;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .modal-header h2 {
+            font-size: 22px;
+            margin: 0;
+        }
+
+        .modal-subtitle {
+            font-size: 14px;
+            opacity: 0.9;
+            margin-top: 5px;
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 20px;
+            right: 25px;
+            font-size: 32px;
+            color: white;
+            cursor: pointer;
+            line-height: 1;
+            transition: transform 0.2s;
+        }
+
+        .close-btn:hover {
+            transform: scale(1.2);
+        }
+
+        .btn-info {
+            background: #5FC4B8;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-info:hover {
+            background: #004D4D;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(95, 196, 184, 0.3);
+        }
+
+        .modal-body {
+            padding: 30px;
+        }
+
+        .detail-section {
+            margin-bottom: 25px;
+        }
+
+        .detail-section h3 {
+            font-size: 16px;
+            color: #495057;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+
+        .detail-section p {
+            color: #6c757d;
+            line-height: 1.6;
+        }
+
+        .contact-card {
+            background: white;
+            border: 2px solid #e9ecef;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 15px;
+            transition: all 0.3s;
+        }
+
+        .contact-card:hover {
+            border-color: #5FC4B8;
+            box-shadow: 0 4px 12px rgba(95, 196, 184, 0.15);
+        }
+
+        .contact-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 15px;
+        }
+
+        .contact-name {
+            font-size: 18px;
+            font-weight: 700;
+            color: #2d3748;
+            margin-bottom: 4px;
+        }
+
+        .contact-title {
+            font-size: 14px;
+            color: #6c757d;
+            font-style: italic;
+        }
+
+        .path-indicator {
+            background: #d4edda;
+            color: #155724;
+            padding: 6px 12px;
+            border-radius: 16px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .path-list {
+            margin-top: 10px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+
+        .path-item {
+            padding: 10px;
+            margin: 8px 0;
+            background: white;
+            border-left: 3px solid #28a745;
+            border-radius: 6px;
+        }
+
+        .path-item.medium {
+            border-left-color: #ffc107;
+        }
+
+        .path-item.weak {
+            border-left-color: #dc3545;
+        }
+
+        .path-chain {
+            font-size: 14px;
+            color: #2d3748;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .path-details {
+            font-size: 12px;
+            color: #6c757d;
+        }
+
+        .no-paths {
+            background: #fff3cd;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #ffc107;
+            color: #856404;
+        }
+
+        .profile-card {
+            background: white;
+            border: 2px solid #e9ecef;
+            border-radius: 12px;
+            margin-bottom: 16px;
+            overflow: hidden;
+            transition: all 0.3s;
+        }
+
+        .profile-card:hover {
+            border-color: #5FC4B8;
+            box-shadow: 0 4px 12px rgba(95, 196, 184, 0.15);
+        }
+
+        .profile-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px;
+            cursor: pointer;
+            user-select: none;
+            background: white;
+            border-bottom: 2px solid #e9ecef;
+        }
+
+        .profile-card-header:hover {
+            background: #f8f9fa;
+        }
+
+        .profile-info {
+            flex: 1;
+        }
+
+        .profile-name {
+            font-size: 18px;
+            font-weight: 700;
+            color: #2d3748;
+            margin-bottom: 4px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .profile-role {
+            font-size: 14px;
+            color: #6c757d;
+            font-style: italic;
+        }
+
+        .profile-actions {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .expand-icon {
+            font-size: 24px;
+            color: #5FC4B8;
+            transition: transform 0.3s;
+        }
+
+        .profile-card.expanded .expand-icon {
+            transform: rotate(180deg);
+        }
+
+        .profile-body {
+            display: none;
+            padding: 20px;
+            background: #f8f9fa;
+        }
+
+        .profile-card.expanded .profile-body {
+            display: block;
+        }
+
+        /* Simple List View Styles */
+        .connector-list-item {
+            background: white;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 16px;
+            transition: all 0.3s;
+        }
+
+        .connector-list-item:hover {
+            border-color: #5FC4B8;
+            box-shadow: 0 2px 8px rgba(95, 196, 184, 0.15);
+        }
+
+        .connector-list-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .connector-list-name {
+            font-size: 18px;
+            font-weight: 700;
+            color: #2d3748;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .connector-list-role {
+            font-size: 14px;
+            color: #6c757d;
+            font-style: italic;
+            margin-top: 4px;
+        }
+
+        .connector-list-prospects {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .connector-prospect-item {
+            padding: 10px 15px;
+            background: #f8f9fa;
+            border-left: 3px solid #5FC4B8;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .connector-prospect-item:hover {
+            background: #e9ecef;
+            border-left-color: #004D4D;
+            transform: translateX(5px);
+        }
+
+        .connector-prospect-firm {
+            font-weight: 600;
+            color: #2d3748;
+        }
+
+        .connector-prospect-name {
+            color: #6c757d;
+            margin-left: 8px;
+        }
+
+        .connector-prospect-meta {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 12px;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 28px;
+            }
+
+            .filter-row {
+                grid-template-columns: 1fr;
+            }
+
+            .stats {
+                flex-direction: column;
+            }
+
+            table {
+                font-size: 12px;
+            }
+
+            th, td {
+                padding: 10px;
+            }
+
+            .modal-content {
+                margin: 20px auto;
+            }
+
+            .profile-card-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+
+            .profile-actions {
+                width: 100%;
+                justify-content: space-between;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- LOADING OVERLAY -->
+    <div class="loading-overlay" id="loading-overlay">
+        <div class="loading-spinner"></div>
+        <div class="loading-text">🔄 Loading FourBridge Data from Google Sheets...</div>
+        <div class="loading-details">Fetching firms, prospects, connections, and team data...</div>
+        <div class="loading-log" id="loading-log"></div>
+    </div>
+
+    <div class="container">
+        <div class="header">
+            <h1>FourBridge</h1>
+            <p>Relationship Intelligence System</p>
+            <div class="tabs">
+                <button class="tab active" onclick="switchView('prospects')">📊 Prospects</button>
+                <button class="tab" onclick="switchView('connections')">🤝 Connections</button>
+                <button class="tab" onclick="switchView('firms')">📁 Firms Database</button>
+                <button class="tab" onclick="switchView('team')">👥 Team</button>
+            </div>
+        </div>
+
+        <!-- PROSPECTS VIEW -->
+        <div id="prospects-view" class="view active">
+            <div class="info-tip">
+                💡 <strong>Prospects View:</strong> Target people and firms we want to reach. Toggle between people-focused and firm-focused views below.
+            </div>
+
+            <div style="display: flex; justify-content: center; gap: 10px; margin-bottom: 20px;">
+                <button class="tab" id="view-people-btn" onclick="setProspectsViewMode('people')" style="margin: 0;">
+                    👤 View by People
+                </button>
+                <button class="tab active" id="view-firms-btn" onclick="setProspectsViewMode('firms')" style="margin: 0;">
+                    🏢 View by Firms
+                </button>
+            </div>
+
+            <div class="filter-row">
+                <div class="filter-group">
+                    <label>Search</label>
+                    <input type="text" id="prospects-search" placeholder="Search names, firms, titles...">
+                </div>
+                <div class="filter-group">
+                    <label>Organization Type</label>
+                    <select id="prospects-type">
+                        <option value="">All Types</option>
+                        <option value="SFO">Single Family Office</option>
+                        <option value="MFO">Multi-Family Office</option>
+                        <option value="Foundation">Foundation</option>
+                        <option value="Endowment">Endowment</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label>Location</label>
+                    <select id="prospects-location">
+                        <option value="">All Locations</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label>Connection Status</label>
+                    <select id="prospects-connection">
+                        <option value="">All</option>
+                        <option value="yes">With Warm Paths</option>
+                        <option value="no">No Connections</option>
+                    </select>
+                </div>
+                <div class="filter-group" id="decision-maker-filter-group" style="display: none;">
+                    <label>Decision Maker</label>
+                    <select id="prospects-decision-maker">
+                        <option value="">All</option>
+                        <option value="yes">Decision Makers Only</option>
+                        <option value="no">Non-Decision Makers</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="stats" id="prospects-stats"></div>
+
+            <div class="table-container" id="prospects-firms-table">
+                <table>
+                    <thead>
+                        <tr>
+                            <th onclick="sortProspectsTable(0)">Firm Name</th>
+                            <th onclick="sortProspectsTable(1)">Type</th>
+                            <th onclick="sortProspectsTable(2)">Location</th>
+                            <th onclick="sortProspectsTable(3)">AUM</th>
+                            <th onclick="sortProspectsTable(4)">Contacts</th>
+                            <th onclick="sortProspectsTable(5)">Warm Paths</th>
+                            <th onclick="sortProspectsTable(6)">Priority</th>
+                        </tr>
+                    </thead>
+                    <tbody id="prospects-table-body"></tbody>
+                </table>
+            </div>
+
+            <div class="table-container" id="prospects-people-table" style="display: none;">
+                <table>
+                    <thead>
+                        <tr>
+                            <th onclick="sortProspectsPeopleTable(0)">Prospect Name</th>
+                            <th onclick="sortProspectsPeopleTable(1)">Title</th>
+                            <th onclick="sortProspectsPeopleTable(2)">Firm</th>
+                            <th onclick="sortProspectsPeopleTable(3)">Type</th>
+                            <th onclick="sortProspectsPeopleTable(4)">Location</th>
+                            <th onclick="sortProspectsPeopleTable(5)">Status</th>
+                            <th onclick="sortProspectsPeopleTable(6)">Warm Paths</th>
+                        </tr>
+                    </thead>
+                    <tbody id="prospects-people-table-body"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- CONNECTIONS VIEW -->
+        <div id="connections-view" class="view">
+            <div class="info-tip">
+                💡 <strong>Connections View:</strong> Browse by mutual connections. Click connector names to expand and see prospects they can reach. Click "Info" to see which FourBridge team members know them.
+            </div>
+
+            <div class="filter-row">
+                <div class="filter-group">
+                    <label>Search Connectors</label>
+                    <input type="text" id="connections-search" placeholder="Search name or company...">
+                </div>
+                <div class="filter-group">
+                    <label>Sort By</label>
+                    <select id="connections-sort">
+                        <option value="most">Most Connections</option>
+                        <option value="fewest">Fewest Connections</option>
+                        <option value="alpha">A-Z</option>
+                        <option value="alpha-desc">Z-A</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label>Display Style</label>
+                    <select id="connections-display">
+                        <option value="list">📋 Simple List</option>
+                        <option value="cards">🗂️ Detailed Cards</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="stats" id="connections-stats"></div>
+
+            <div id="connectors-display"></div>
+        </div>
+
+        <!-- FIRMS DATABASE VIEW -->
+        <div id="firms-view" class="view">
+            <div class="info-tip">
+                💡 <strong>Firms Database:</strong> Complete directory of all firms. This includes target prospects, past contacts, and cold leads. Click any firm to see full details and relationship map.
+            </div>
+
+            <div class="filter-row">
+                <div class="filter-group">
+                    <label>Search</label>
+                    <input type="text" id="firms-search" placeholder="Search firms...">
+                </div>
+                <div class="filter-group">
+                    <label>Type</label>
+                    <select id="firms-type">
+                        <option value="">All Types</option>
+                        <option value="SFO">Single Family Office</option>
+                        <option value="MFO">Multi-Family Office</option>
+                        <option value="Foundation">Foundation</option>
+                        <option value="Endowment">Endowment</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label>Location</label>
+                    <select id="firms-location">
+                        <option value="">All Locations</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label>Status</label>
+                    <select id="firms-status">
+                        <option value="">All Status</option>
+                        <option value="target_prospect">Target Prospect</option>
+                        <option value="cold_lead">Cold Lead</option>
+                        <option value="past_contact">Past Contact</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="stats" id="firms-stats"></div>
+
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th onclick="sortFirmsTable(0)">Firm Name</th>
+                            <th onclick="sortFirmsTable(1)">Type</th>
+                            <th onclick="sortFirmsTable(2)">Location</th>
+                            <th onclick="sortFirmsTable(3)">AUM</th>
+                            <th onclick="sortFirmsTable(4)">Status</th>
+                            <th onclick="sortFirmsTable(5)">Contacts</th>
+                            <th onclick="sortFirmsTable(6)">Warm Paths</th>
+                        </tr>
+                    </thead>
+                    <tbody id="firms-table-body"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- TEAM DATABASE VIEW -->
+        <div id="team-view" class="view">
+            <div class="info-tip">
+                💡 <strong>Team Database:</strong> FourBridge team member profiles with network strength metrics. Click any team member to see their complete network map and reachable prospects.
+            </div>
+
+            <div class="filter-row">
+                <div class="filter-group">
+                    <label>Search Team</label>
+                    <input type="text" id="team-search" placeholder="Search name or role...">
+                </div>
+                <div class="filter-group">
+                    <label>Sort By</label>
+                    <select id="team-sort">
+                        <option value="reach">Most Reach</option>
+                        <option value="connectors">Most Connectors</option>
+                        <option value="alpha">A-Z</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="stats" id="team-stats"></div>
+
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th onclick="sortTeamTable(0)">Name</th>
+                            <th onclick="sortTeamTable(1)">Role</th>
+                            <th onclick="sortTeamTable(2)">Location</th>
+                            <th onclick="sortTeamTable(3)">Connectors</th>
+                            <th onclick="sortTeamTable(4)">Firms Reachable</th>
+                            <th onclick="sortTeamTable(5)">Prospects</th>
+                        </tr>
+                    </thead>
+                    <tbody id="team-table-body"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- DETAIL MODAL -->
+    <div id="detail-modal" class="modal" onclick="closeModal(event)">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <div class="modal-header">
+                <span class="close-btn" onclick="closeModal()">&times;</span>
+                <h2 id="modal-name"></h2>
+                <div class="modal-subtitle" id="modal-subtitle"></div>
+            </div>
+            <div class="modal-body" id="modal-body"></div>
+        </div>
+    </div>
+
+    <script>
+        // ========== CONFIGURATION ==========
+        const SHEET_ID = '183HM7pUH-gdd4FXm94G05Bm0KJrfHioDU2Ti1GQiOWo';
+        const PUBLISHED_ID = '2PACX-1vQa6QC3ZJ9qU8KoypqBCBMsf68a8W7257eyTyk6nCIx4aRc54MPxtqwDBjjiDQxlhF5Y85_XT2ND-CK';
+        
+        // Tab GIDs from the actual Google Sheet
+        const SHEET_TABS = {
+            firms: { name: 'firms', gid: 0 },
+            team: { name: 'team', gid: 835603482 },
+            mutualConnections: { name: 'mutual connections', gid: 519427041 },
+            prospects: { name: 'prospects', gid: 857156726 }
+        };
+
+        // ========== GLOBAL DATA STORAGE ==========
+        let toolData = {
+            version: "2025-11-20-sheets-powered",
+            lastUpdated: new Date().toISOString(),
+            firms: [],
+            prospects: [],
+            teamMembers: [],
+            mutualConnections: [],
+            relationships: []
+        };
+
+        // ========== LOGGING UTILITY ==========
+        function log(message, type = 'info') {
+            const logDiv = document.getElementById('loading-log');
+            const entry = document.createElement('div');
+            entry.className = `log-entry log-${type}`;
+            const timestamp = new Date().toLocaleTimeString();
+            entry.textContent = `[${timestamp}] ${message}`;
+            logDiv.appendChild(entry);
+            logDiv.scrollTop = logDiv.scrollHeight;
+            console.log(`[${type.toUpperCase()}] ${message}`);
+        }
+
+        // ========== NAME NORMALIZATION ==========
+        function normalizeName(name) {
+            if (!name) return '';
+            return name.toString().toLowerCase().trim().replace(/\s+/g, ' ');
+        }
+
+        // ========== CSV PARSER ==========
+        function parseCSV(csvText) {
+            const lines = csvText.split('\n');
+            const result = [];
+            let currentRow = [];
+            let inQuotes = false;
+            let currentField = '';
+
+            for (let line of lines) {
+                if (!line.trim()) continue;
+
+                for (let i = 0; i < line.length; i++) {
+                    const char = line[i];
+                    const nextChar = line[i + 1];
+
+                    if (char === '"') {
+                        if (inQuotes && nextChar === '"') {
+                            currentField += '"';
+                            i++;
+                        } else {
+                            inQuotes = !inQuotes;
+                        }
+                    } else if (char === ',' && !inQuotes) {
+                        currentRow.push(currentField);
+                        currentField = '';
+                    } else {
+                        currentField += char;
+                    }
+                }
+
+                if (!inQuotes) {
+                    currentRow.push(currentField);
+                    result.push(currentRow);
+                    currentRow = [];
+                    currentField = '';
+                } else {
+                    currentField += '\n';
+                }
+            }
+
+            return result;
+        }
+
+        // ========== DATA FETCHING ==========
+        async function fetchSheetData(tabName) {
+            log(`Fetching ${tabName} data...`, 'info');
+            
+            // Get the GID for this tab
+            const tabConfig = SHEET_TABS[tabName];
+            if (!tabConfig) {
+                throw new Error(`Unknown tab: ${tabName}`);
+            }
+            
+            const gid = tabConfig.gid;
+            
+            // Try multiple URL formats
+            const urls = [
+                // Format 1: Direct export with GID (most reliable)
+                `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=${gid}`,
+                // Format 2: Published sheet
+                `https://docs.google.com/spreadsheets/d/e/${PUBLISHED_ID}/pub?gid=${gid}&single=true&output=csv`
+            ];
+            
+            for (let i = 0; i < urls.length; i++) {
+                try {
+                    log(`  Trying URL format ${i + 1} (GID ${gid})...`, 'info');
+                    
+                    const response = await fetch(urls[i], {
+                        method: 'GET',
+                        mode: 'cors'
+                    });
+                    
+                    if (!response.ok) {
+                        log(`  Format ${i + 1} failed: HTTP ${response.status}`, 'warning');
+                        continue;
+                    }
+                    
+                    const text = await response.text();
+                    
+                    // Check if we got actual data
+                    if (!text || text.length < 10) {
+                        log(`  Format ${i + 1} returned empty data`, 'warning');
+                        continue;
+                    }
+                    
+                    const rows = parseCSV(text);
+                    
+                    if (rows.length === 0) {
+                        log(`  Format ${i + 1} parsed 0 rows`, 'warning');
+                        continue;
+                    }
+                    
+                    log(`✓ Loaded ${rows.length - 1} rows from ${tabName}`, 'success');
+                    return rows;
+                    
+                } catch (error) {
+                    log(`  Format ${i + 1} error: ${error.message}`, 'warning');
+                    continue;
+                }
+            }
+            
+            // All methods failed
+            throw new Error(`Failed to fetch ${tabName} - all URL formats failed. The sheet may need additional permissions or the browser may be blocking requests.`);
+        }
+
+        // ========== PARSE CURRENCY ==========
+        function parseCurrency(value) {
+            if (!value) return 0;
+            const str = value.toString().replace(/[$,]/g, '');
+            const num = parseFloat(str);
+            return isNaN(num) ? 0 : num / 1000000; // Convert to millions
+        }
+
+        // ========== DATA PROCESSING ==========
+        async function loadAllData() {
+            try {
+                log('🚀 Starting data load...', 'info');
+
+                // Fetch all sheets
+                const [firmsData, teamData, connectorsData, prospectsData] = await Promise.all([
+                    fetchSheetData('firms'),
+                    fetchSheetData('team'),
+                    fetchSheetData('mutualConnections'),
+                    fetchSheetData('prospects')
+                ]);
+
+                log('📊 Processing firms data...', 'info');
+                processFirmsData(firmsData);
+                
+                log('👥 Processing team data...', 'info');
+                processTeamData(teamData);
+                
+                log('🤝 Processing connectors data...', 'info');
+                processConnectorsData(connectorsData);
+                
+                log('🎯 Processing prospects data...', 'info');
+                processProspectsData(prospectsData);
+                
+                log('🔗 Building relationships...', 'info');
+                buildRelationships();
+                
+                log('✅ Data load complete!', 'success');
+                log(`📈 Stats: ${toolData.firms.length} firms, ${toolData.prospects.length} prospects, ${toolData.teamMembers.length} team members, ${toolData.mutualConnections.length} connectors, ${toolData.relationships.length} relationships`, 'info');
+
+                return true;
+            } catch (error) {
+                log(`❌ Fatal error: ${error.message}`, 'error');
+                throw error;
+            }
+        }
+
+        function processFirmsData(rows) {
+            const headers = rows[0];
+            const firmsByName = {};
+
+            for (let i = 1; i < rows.length; i++) {
+                const row = rows[i];
+                if (!row[0]) continue;
+
+                const firm = {
+                    id: `firm_${i}`,
+                    name: row[0] || '',
+                    type: row[1] || 'SFO',
+                    location: row[2] || '',
+                    description: row[3] || '',
+                    aum: parseCurrency(row[4]),
+                    website: row[5] || '',
+                    status: row[6] || 'target_prospect',
+                    priority: parseInt(row[7]) || 0,
+                    notes: row[8] || '',
+                    tags: [],
+                    dateAdded: new Date().toISOString().split('T')[0],
+                    lastUpdated: new Date().toISOString()
+                };
+
+                toolData.firms.push(firm);
+                firmsByName[normalizeName(firm.name)] = firm;
+            }
+
+            window.firmsByName = firmsByName;
+            log(`Processed ${toolData.firms.length} firms`, 'success');
+        }
+
+        function processTeamData(rows) {
+            const headers = rows[0];
+
+            for (let i = 1; i < rows.length; i++) {
+                const row = rows[i];
+                if (!row[0]) continue;
+
+                const member = {
+                    id: `team_${i}`,
+                    name: row[0] || '',
+                    role: row[1] || '',
+                    email: row[2] || '',
+                    phone: row[3] || '',
+                    linkedin: row[4] || '',
+                    active: row[5] !== 'false',
+                    location: row[6] || '',
+                    specialties: row[7] || ''
+                };
+
+                toolData.teamMembers.push(member);
+            }
+
+            log(`Processed ${toolData.teamMembers.length} team members`, 'success');
+        }
+
+        function processConnectorsData(rows) {
+            const headers = rows[0];
+
+            for (let i = 1; i < rows.length; i++) {
+                const row = rows[i];
+                if (!row[0]) continue;
+
+                const connector = {
+                    id: `connector_${i}`,
+                    name: row[0] || '',
+                    title: row[1] || '',
+                    company: row[2] || '',
+                    email: row[3] || '',
+                    phone: row[4] || '',
+                    linkedin: row[5] || '',
+                    teamConnections: [], // Which team members know this person
+                    prospects: [] // Which prospects this person knows
+                };
+
+                // Parse team connections from columns starting at index 6
+                for (let j = 6; j < Math.min(row.length, 10); j++) {
+                    if (row[j] && row[j].trim()) {
+                        connector.teamConnections.push(row[j].trim());
+                    }
+                }
+
+                // Parse prospects from remaining columns
+                for (let j = 10; j < row.length; j++) {
+                    if (row[j] && row[j].trim()) {
+                        connector.prospects.push(row[j].trim());
+                    }
+                }
+
+                toolData.mutualConnections.push(connector);
+            }
+
+            log(`Processed ${toolData.mutualConnections.length} connectors`, 'success');
+        }
+
+        function processProspectsData(rows) {
+            const headers = rows[0];
+
+            for (let i = 1; i < rows.length; i++) {
+                const row = rows[i];
+                if (!row[0]) continue;
+
+                const prospect = {
+                    id: `prospect_${i}`,
+                    name: row[0] || '',
+                    title: row[1] || '',
+                    firmName: row[2] || '',
+                    firmId: null,
+                    email: row[3] || '',
+                    phone: row[4] || '',
+                    linkedin: row[5] || '',
+                    mutualConnections: [],
+                    role: '',
+                    notes: '',
+                    primaryContact: false
+                };
+
+                // Link to firm
+                const firmName = normalizeName(prospect.firmName);
+                const firm = window.firmsByName[firmName];
+                if (firm) {
+                    prospect.firmId = firm.id;
+                } else if (prospect.firmName) {
+                    log(`⚠ Prospect "${prospect.name}" lists firm "${prospect.firmName}" which wasn't found`, 'warning');
+                }
+
+                // Parse mutual connections from remaining columns
+                for (let j = 6; j < row.length; j++) {
+                    if (row[j] && row[j].trim()) {
+                        prospect.mutualConnections.push(row[j].trim());
+                    }
+                }
+
+                toolData.prospects.push(prospect);
+            }
+
+            log(`Processed ${toolData.prospects.length} prospects`, 'success');
+        }
+
+        function buildRelationships() {
+            const relationships = [];
+            const prospectsByName = {};
+            const connectorsByName = {};
+            const teamByName = {};
+
+            // Build lookup dictionaries
+            toolData.prospects.forEach(p => {
+                prospectsByName[normalizeName(p.name)] = p;
+            });
+            toolData.mutualConnections.forEach(c => {
+                connectorsByName[normalizeName(c.name)] = c;
+            });
+            toolData.teamMembers.forEach(t => {
+                teamByName[normalizeName(t.name)] = t;
+            });
+
+            let matched = 0;
+            let unmatched = 0;
+
+            // Build relationships from prospects
+            toolData.prospects.forEach(prospect => {
+                prospect.mutualConnections.forEach(connectorName => {
+                    const normalizedConnector = normalizeName(connectorName);
+                    const connector = connectorsByName[normalizedConnector];
+
+                    if (connector) {
+                        // Find which team members know this connector
+                        connector.teamConnections.forEach(teamName => {
+                            const normalizedTeam = normalizeName(teamName);
+                            const teamMember = teamByName[normalizedTeam];
+
+                            if (teamMember) {
+                                relationships.push({
+                                    teamMemberId: teamMember.id,
+                                    connectorId: connector.id,
+                                    prospectId: prospect.id,
+                                    firmId: prospect.firmId,
+                                    strength: 'strong'
+                                });
+                                matched++;
+                            }
+                        });
+                    } else {
+                        unmatched++;
+                    }
+                });
+            });
+
+            // Also process from connector side
+            toolData.mutualConnections.forEach(connector => {
+                connector.prospects.forEach(prospectName => {
+                    const normalizedProspect = normalizeName(prospectName);
+                    const prospect = prospectsByName[normalizedProspect];
+
+                    if (prospect) {
+                        connector.teamConnections.forEach(teamName => {
+                            const normalizedTeam = normalizeName(teamName);
+                            const teamMember = teamByName[normalizedTeam];
+
+                            if (teamMember) {
+                                // Check if this relationship already exists
+                                const exists = relationships.some(r =>
+                                    r.teamMemberId === teamMember.id &&
+                                    r.connectorId === connector.id &&
+                                    r.prospectId === prospect.id
+                                );
+
+                                if (!exists) {
+                                    relationships.push({
+                                        teamMemberId: teamMember.id,
+                                        connectorId: connector.id,
+                                        prospectId: prospect.id,
+                                        firmId: prospect.firmId,
+                                        strength: 'strong'
+                                    });
+                                    matched++;
+                                }
+                            }
+                        });
+                    }
+                });
+            });
+
+            toolData.relationships = relationships;
+            log(`Built ${relationships.length} relationship paths (${matched} matches, ${unmatched} unmatched)`, 'success');
+        }
+
+        // ========== UI INITIALIZATION ==========
+        async function initializeApp() {
+            try {
+                await loadAllData();
+                
+                // Hide loading overlay
+                setTimeout(() => {
+                    document.getElementById('loading-overlay').style.display = 'none';
+                    
+                    // Initialize all views
+                    initializeViews();
+                    renderAllViews();
+                }, 1000);
+            } catch (error) {
+                log(`💥 Application failed to load: ${error.message}`, 'error');
+                
+                // Show helpful error message
+                const errorDiv = document.createElement('div');
+                errorDiv.style.cssText = `
+                    position: fixed;
+                    top: 50%;
+                    left: 50%;
+                    transform: translate(-50%, -50%);
+                    background: white;
+                    padding: 30px;
+                    border-radius: 12px;
+                    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+                    max-width: 600px;
+                    z-index: 10000;
+                `;
+                errorDiv.innerHTML = `
+                    <h2 style="color: #ff6b6b; margin-bottom: 15px;">❌ Unable to Load Data</h2>
+                    <p style="margin-bottom: 15px;">The tool couldn't fetch data from your Google Sheet. This usually means the sheet needs to be published.</p>
+                    <h3 style="color: #004D4D; margin-top: 20px; margin-bottom: 10px;">📋 How to Fix:</h3>
+                    <ol style="line-height: 1.8; color: #2d3748;">
+                        <li>Open your Google Sheet</li>
+                        <li>Click <strong>File</strong> → <strong>Share</strong> → <strong>Publish to web</strong></li>
+                        <li>Select <strong>Entire Document</strong></li>
+                        <li>Click <strong>Publish</strong></li>
+                        <li>Click <strong>OK</strong> on the confirmation</li>
+                        <li>Refresh this page</li>
+                    </ol>
+                    <p style="margin-top: 20px; padding: 15px; background: #e7f3ff; border-radius: 8px; font-size: 14px;">
+                        💡 <strong>Note:</strong> "Anyone with link can view" is different from "Publish to web". You need to publish it.
+                    </p>
+                    <button onclick="location.reload()" style="
+                        margin-top: 20px;
+                        padding: 12px 24px;
+                        background: #5FC4B8;
+                        color: white;
+                        border: none;
+                        border-radius: 6px;
+                        font-size: 16px;
+                        font-weight: 600;
+                        cursor: pointer;
+                    ">Retry After Publishing</button>
+                `;
+                document.body.appendChild(errorDiv);
+            }
+        }
+
+        function initializeViews() {
+            // Populate location filters
+            const locations = [...new Set(toolData.firms.map(f => f.location).filter(l => l))].sort();
+            
+            ['prospects-location', 'firms-location'].forEach(id => {
+                const select = document.getElementById(id);
+                locations.forEach(loc => {
+                    const option = document.createElement('option');
+                    option.value = loc;
+                    option.textContent = loc;
+                    select.appendChild(option);
+                });
+            });
+
+            // Attach filter event listeners
+            document.getElementById('prospects-search').addEventListener('input', renderProspectsView);
+            document.getElementById('prospects-type').addEventListener('change', renderProspectsView);
+            document.getElementById('prospects-location').addEventListener('change', renderProspectsView);
+            document.getElementById('prospects-connection').addEventListener('change', renderProspectsView);
+
+            document.getElementById('connections-search').addEventListener('input', renderConnectionsView);
+            document.getElementById('connections-sort').addEventListener('change', renderConnectionsView);
+            document.getElementById('connections-display').addEventListener('change', renderConnectionsView);
+
+            document.getElementById('firms-search').addEventListener('input', renderFirmsView);
+            document.getElementById('firms-type').addEventListener('change', renderFirmsView);
+            document.getElementById('firms-location').addEventListener('change', renderFirmsView);
+            document.getElementById('firms-status').addEventListener('change', renderFirmsView);
+
+            document.getElementById('team-search').addEventListener('input', renderTeamView);
+            document.getElementById('team-sort').addEventListener('change', renderTeamView);
+        }
+
+        function renderAllViews() {
+            renderProspectsView();
+            renderConnectionsView();
+            renderFirmsView();
+            renderTeamView();
+        }
+
+        // ========== VIEW SWITCHING ==========
+        let currentView = 'prospects';
+
+        function switchView(viewName) {
+            currentView = viewName;
+            
+            // Update tab buttons
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            event.target.classList.add('active');
+
+            // Show selected view
+            document.querySelectorAll('.view').forEach(view => {
+                view.classList.remove('active');
+            });
+            document.getElementById(`${viewName}-view`).classList.add('active');
+        }
+
+        // ========== PROSPECTS VIEW ==========
+        let prospectsViewMode = 'firms';
+
+        function setProspectsViewMode(mode) {
+            prospectsViewMode = mode;
+            
+            document.getElementById('view-people-btn').classList.toggle('active', mode === 'people');
+            document.getElementById('view-firms-btn').classList.toggle('active', mode === 'firms');
+            
+            document.getElementById('prospects-people-table').style.display = mode === 'people' ? 'block' : 'none';
+            document.getElementById('prospects-firms-table').style.display = mode === 'firms' ? 'block' : 'none';
+            
+            renderProspectsView();
+        }
+
+        function renderProspectsView() {
+            const search = document.getElementById('prospects-search').value.toLowerCase();
+            const typeFilter = document.getElementById('prospects-type').value;
+            const locationFilter = document.getElementById('prospects-location').value;
+            const connectionFilter = document.getElementById('prospects-connection').value;
+
+            if (prospectsViewMode === 'firms') {
+                renderProspectsFirmsView(search, typeFilter, locationFilter, connectionFilter);
+            } else {
+                renderProspectsPeopleView(search, typeFilter, locationFilter, connectionFilter);
+            }
+        }
+
+        function renderProspectsFirmsView(search, typeFilter, locationFilter, connectionFilter) {
+            let filtered = toolData.firms.filter(firm => {
+                const matchesSearch = !search || 
+                    firm.name.toLowerCase().includes(search) ||
+                    firm.location.toLowerCase().includes(search);
+                
+                const matchesType = !typeFilter || firm.type === typeFilter || 
+                    (typeFilter === 'SFO' && firm.type === 'Single Family Office') ||
+                    (typeFilter === 'MFO' && firm.type === 'Multi-Family Office');
+                
+                const matchesLocation = !locationFilter || firm.location === locationFilter;
+                
+                const hasConnections = toolData.relationships.some(r => r.firmId === firm.id);
+                const matchesConnection = !connectionFilter || 
+                    (connectionFilter === 'yes' && hasConnections) ||
+                    (connectionFilter === 'no' && !hasConnections);
+
+                return matchesSearch && matchesType && matchesLocation && matchesConnection;
+            });
+
+            const tbody = document.getElementById('prospects-table-body');
+            tbody.innerHTML = '';
+
+            filtered.forEach(firm => {
+                const row = tbody.insertRow();
+                row.className = 'clickable-row';
+                row.onclick = () => showFirmDetail(firm);
+
+                const contactCount = toolData.prospects.filter(p => p.firmId === firm.id).length;
+                const pathCount = toolData.relationships.filter(r => r.firmId === firm.id).length;
+
+                const typeClass = firm.type.toLowerCase().replace(/[^a-z]/g, '-');
+                const statusClass = firm.status.toLowerCase().replace(/[^a-z]/g, '-');
+
+                row.innerHTML = `
+                    <td><strong>${firm.name}</strong></td>
+                    <td><span class="badge badge-${typeClass}">${firm.type}</span></td>
+                    <td>${firm.location}</td>
+                    <td>${formatAUM(firm.aum)}</td>
+                    <td>${contactCount}</td>
+                    <td>${pathCount > 0 ? `<span class="badge" style="background: #d4edda; color: #155724;">✓ ${pathCount} path${pathCount > 1 ? 's' : ''}</span>` : '<span style="color: #6c757d;">—</span>'}</td>
+                    <td>${firm.priority || '—'}</td>
+                `;
+            });
+
+            // Update stats
+            const totalTarget = toolData.firms.filter(f => f.status === 'target_prospect').length;
+            const withPaths = new Set(toolData.relationships.map(r => r.firmId)).size;
+            
+            document.getElementById('prospects-stats').innerHTML = `
+                <div class="stat">
+                    <span class="stat-value">${toolData.firms.length}</span>
+                    <span class="stat-label">Total Firms</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-value">${filtered.length}</span>
+                    <span class="stat-label">Filtered</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-value">${totalTarget}</span>
+                    <span class="stat-label">Target Prospects</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-value">${withPaths}</span>
+                    <span class="stat-label">With Warm Paths</span>
+                </div>
+            `;
+        }
+
+        function renderProspectsPeopleView(search, typeFilter, locationFilter, connectionFilter) {
+            let filtered = toolData.prospects.map(p => {
+                const firm = toolData.firms.find(f => f.id === p.firmId);
+                return { ...p, firm };
+            }).filter(p => {
+                if (!p.firm) return false;
+
+                const matchesSearch = !search || 
+                    p.name.toLowerCase().includes(search) ||
+                    p.title.toLowerCase().includes(search) ||
+                    p.firmName.toLowerCase().includes(search);
+                
+                const matchesType = !typeFilter || p.firm.type === typeFilter ||
+                    (typeFilter === 'SFO' && p.firm.type === 'Single Family Office') ||
+                    (typeFilter === 'MFO' && p.firm.type === 'Multi-Family Office');
+                
+                const matchesLocation = !locationFilter || p.firm.location === locationFilter;
+                
+                const hasConnections = toolData.relationships.some(r => r.prospectId === p.id);
+                const matchesConnection = !connectionFilter || 
+                    (connectionFilter === 'yes' && hasConnections) ||
+                    (connectionFilter === 'no' && !hasConnections);
+
+                return matchesSearch && matchesType && matchesLocation && matchesConnection;
+            });
+
+            const tbody = document.getElementById('prospects-people-table-body');
+            tbody.innerHTML = '';
+
+            filtered.forEach(prospect => {
+                const row = tbody.insertRow();
+                row.className = 'clickable-row';
+                row.onclick = () => showProspectDetail(prospect);
+
+                const pathCount = toolData.relationships.filter(r => r.prospectId === prospect.id).length;
+                const typeClass = prospect.firm.type.toLowerCase().replace(/[^a-z]/g, '-');
+                const statusClass = prospect.firm.status.toLowerCase().replace(/[^a-z]/g, '-');
+
+                row.innerHTML = `
+                    <td><strong>${prospect.name}</strong></td>
+                    <td>${prospect.title}</td>
+                    <td>${prospect.firmName}</td>
+                    <td><span class="badge badge-${typeClass}">${prospect.firm.type}</span></td>
+                    <td>${prospect.firm.location}</td>
+                    <td><span class="badge badge-${statusClass}">${prospect.firm.status.replace(/_/g, ' ')}</span></td>
+                    <td>${pathCount > 0 ? `<span class="badge" style="background: #d4edda; color: #155724;">✓ ${pathCount} path${pathCount > 1 ? 's' : ''}</span>` : '<span style="color: #6c757d;">—</span>'}</td>
+                `;
+            });
+
+            // Update stats
+            const withPaths = toolData.prospects.filter(p => 
+                toolData.relationships.some(r => r.prospectId === p.id)
+            ).length;
+            
+            document.getElementById('prospects-stats').innerHTML = `
+                <div class="stat">
+                    <span class="stat-value">${toolData.prospects.length}</span>
+                    <span class="stat-label">Total Prospects</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-value">${filtered.length}</span>
+                    <span class="stat-label">Filtered</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-value">${withPaths}</span>
+                    <span class="stat-label">With Warm Paths</span>
+                </div>
+            `;
+        }
+
+        // ========== CONNECTIONS VIEW ==========
+        function renderConnectionsView() {
+            const search = document.getElementById('connections-search').value.toLowerCase();
+            const sortBy = document.getElementById('connections-sort').value;
+            const displayMode = document.getElementById('connections-display').value;
+
+            let filtered = toolData.mutualConnections.filter(c => {
+                return !search || 
+                    c.name.toLowerCase().includes(search) ||
+                    c.company.toLowerCase().includes(search) ||
+                    c.title.toLowerCase().includes(search);
+            });
+
+            // Sort
+            filtered.sort((a, b) => {
+                const aReach = toolData.relationships.filter(r => r.connectorId === a.id).length;
+                const bReach = toolData.relationships.filter(r => r.connectorId === b.id).length;
+
+                if (sortBy === 'most') return bReach - aReach;
+                if (sortBy === 'fewest') return aReach - bReach;
+                if (sortBy === 'alpha') return a.name.localeCompare(b.name);
+                if (sortBy === 'alpha-desc') return b.name.localeCompare(a.name);
+                return 0;
+            });
+
+            const display = document.getElementById('connectors-display');
+            display.innerHTML = '';
+
+            if (displayMode === 'list') {
+                // Simple List View
+                filtered.forEach(connector => {
+                    const reach = toolData.relationships.filter(r => r.connectorId === connector.id);
+                    
+                    const listItem = document.createElement('div');
+                    listItem.className = 'connector-list-item';
+                    
+                    const prospectsHtml = reach.map(r => {
+                        const prospect = toolData.prospects.find(p => p.id === r.prospectId);
+                        const firm = toolData.firms.find(f => f.id === r.firmId);
+                        if (!prospect || !firm) return '';
+                        
+                        return `
+                            <div class="connector-prospect-item" onclick="showProspectDetail(${JSON.stringify(prospect).replace(/"/g, '&quot;')})">
+                                <div>
+                                    <span class="connector-prospect-firm">${firm.name}</span>
+                                    <span class="connector-prospect-name">- ${prospect.name}</span>
+                                </div>
+                                <div class="connector-prospect-meta">
+                                    <span class="badge badge-${firm.type.toLowerCase().replace(/[^a-z]/g, '-')}">${firm.type}</span>
+                                    <span style="color: #6c757d;">${formatAUM(firm.aum)}</span>
+                                </div>
+                            </div>
+                        `;
+                    }).join('');
+                    
+                    listItem.innerHTML = `
+                        <div class="connector-list-header">
+                            <div>
+                                <div class="connector-list-name">
+                                    ${connector.name}
+                                    <span class="badge" style="background: #5FC4B8; color: white;">${reach.length} connection${reach.length > 1 ? 's' : ''}</span>
+                                </div>
+                                <div class="connector-list-role">${connector.title}${connector.company ? `, ${connector.company}` : ''}</div>
+                            </div>
+                            <button class="btn-info" onclick="showConnectorInfo('${connector.id}')">Info</button>
+                        </div>
+                        <div class="connector-list-prospects">
+                            ${prospectsHtml}
+                        </div>
+                    `;
+                    
+                    display.appendChild(listItem);
+                });
+            } else {
+                // Detailed Card View
+                filtered.forEach(connector => {
+                    const reach = toolData.relationships.filter(r => r.connectorId === connector.id);
+                    const uniqueFirms = new Set(reach.map(r => r.firmId));
+                    const uniqueProspects = new Set(reach.map(r => r.prospectId));
+
+                    const card = document.createElement('div');
+                    card.className = 'profile-card';
+                    card.innerHTML = `
+                        <div class="profile-card-header">
+                            <div class="profile-info">
+                                <div class="profile-name">
+                                    ${connector.name}
+                                    <span class="badge" style="background: #5FC4B8; color: white;">${reach.length} paths</span>
+                                </div>
+                                <div class="profile-role">${connector.title}${connector.company ? `, ${connector.company}` : ''}</div>
+                            </div>
+                            <div class="expand-icon">▼</div>
+                        </div>
+                        <div class="profile-body">
+                            <div class="detail-section">
+                                <h3>Reach</h3>
+                                <p>Can connect to ${uniqueProspects.size} prospects at ${uniqueFirms.size} firms</p>
+                            </div>
+                            <div class="detail-section">
+                                <h3>Known By</h3>
+                                <p>${connector.teamConnections.join(', ') || 'No team connections listed'}</p>
+                            </div>
+                            <div class="detail-section">
+                                <h3>Can Reach</h3>
+                                ${reach.slice(0, 10).map(r => {
+                                    const prospect = toolData.prospects.find(p => p.id === r.prospectId);
+                                    const firm = toolData.firms.find(f => f.id === r.firmId);
+                                    return `<div style="margin: 8px 0;">• ${prospect?.name || 'Unknown'} at ${firm?.name || 'Unknown firm'}</div>`;
+                                }).join('')}
+                                ${reach.length > 10 ? `<div style="margin-top: 10px; color: #6c757d; font-style: italic;">...and ${reach.length - 10} more</div>` : ''}
+                            </div>
+                        </div>
+                    `;
+
+                    card.querySelector('.profile-card-header').onclick = () => {
+                        card.classList.toggle('expanded');
+                    };
+
+                    display.appendChild(card);
+                });
+            }
+
+            // Update stats
+            const avgReach = filtered.length > 0 ? 
+                Math.round(filtered.reduce((sum, c) => {
+                    return sum + toolData.relationships.filter(r => r.connectorId === c.id).length;
+                }, 0) / filtered.length) : 0;
+
+            const topConnector = filtered.length > 0 ? filtered[0].name : 'N/A';
+
+            document.getElementById('connections-stats').innerHTML = `
+                <div class="stat">
+                    <span class="stat-value">${toolData.mutualConnections.length}</span>
+                    <span class="stat-label">Total Connectors</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-value">${filtered.length}</span>
+                    <span class="stat-label">Filtered</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-value">${avgReach}</span>
+                    <span class="stat-label">Avg Reach</span>
+                </div>
+            `;
+        }
+
+        // ========== FIRMS VIEW ==========
+        function renderFirmsView() {
+            const search = document.getElementById('firms-search').value.toLowerCase();
+            const typeFilter = document.getElementById('firms-type').value;
+            const locationFilter = document.getElementById('firms-location').value;
+            const statusFilter = document.getElementById('firms-status').value;
+
+            let filtered = toolData.firms.filter(firm => {
+                const matchesSearch = !search || firm.name.toLowerCase().includes(search);
+                const matchesType = !typeFilter || firm.type === typeFilter ||
+                    (typeFilter === 'SFO' && firm.type === 'Single Family Office') ||
+                    (typeFilter === 'MFO' && firm.type === 'Multi-Family Office');
+                const matchesLocation = !locationFilter || firm.location === locationFilter;
+                const matchesStatus = !statusFilter || firm.status === statusFilter;
+
+                return matchesSearch && matchesType && matchesLocation && matchesStatus;
+            });
+
+            const tbody = document.getElementById('firms-table-body');
+            tbody.innerHTML = '';
+
+            filtered.forEach(firm => {
+                const row = tbody.insertRow();
+                row.className = 'clickable-row';
+                row.onclick = () => showFirmDetail(firm);
+
+                const contactCount = toolData.prospects.filter(p => p.firmId === firm.id).length;
+                const pathCount = toolData.relationships.filter(r => r.firmId === firm.id).length;
+
+                const typeClass = firm.type.toLowerCase().replace(/[^a-z]/g, '-');
+                const statusClass = firm.status.toLowerCase().replace(/[^a-z]/g, '-');
+
+                row.innerHTML = `
+                    <td><strong>${firm.name}</strong></td>
+                    <td><span class="badge badge-${typeClass}">${firm.type}</span></td>
+                    <td>${firm.location}</td>
+                    <td>${formatAUM(firm.aum)}</td>
+                    <td><span class="badge badge-${statusClass}">${firm.status.replace(/_/g, ' ')}</span></td>
+                    <td>${contactCount}</td>
+                    <td>${pathCount > 0 ? `<span class="badge" style="background: #d4edda; color: #155724;">✓ ${pathCount}</span>` : '—'}</td>
+                `;
+            });
+
+            // Update stats
+            const statuses = {
+                target_prospect: toolData.firms.filter(f => f.status === 'target_prospect').length,
+                cold_lead: toolData.firms.filter(f => f.status === 'cold_lead').length,
+                past_contact: toolData.firms.filter(f => f.status === 'past_contact').length
+            };
+
+            document.getElementById('firms-stats').innerHTML = `
+                <div class="stat">
+                    <span class="stat-value">${toolData.firms.length}</span>
+                    <span class="stat-label">Total Firms</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-value">${filtered.length}</span>
+                    <span class="stat-label">Filtered</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-value">${statuses.target_prospect}</span>
+                    <span class="stat-label">Target Prospects</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-value">${statuses.past_contact}</span>
+                    <span class="stat-label">Past Contacts</span>
+                </div>
+            `;
+        }
+
+        // ========== TEAM VIEW ==========
+        function renderTeamView() {
+            const search = document.getElementById('team-search').value.toLowerCase();
+            const sortBy = document.getElementById('team-sort').value;
+
+            let filtered = toolData.teamMembers.filter(member => {
+                return !search || 
+                    member.name.toLowerCase().includes(search) ||
+                    member.role.toLowerCase().includes(search);
+            });
+
+            // Calculate metrics for each team member
+            filtered = filtered.map(member => {
+                const rels = toolData.relationships.filter(r => r.teamMemberId === member.id);
+                const connectors = new Set(rels.map(r => r.connectorId)).size;
+                const firms = new Set(rels.map(r => r.firmId).filter(id => id)).size;
+                const prospects = new Set(rels.map(r => r.prospectId)).size;
+
+                return { ...member, connectors, firms, prospects };
+            });
+
+            // Sort
+            filtered.sort((a, b) => {
+                if (sortBy === 'reach') return b.prospects - a.prospects;
+                if (sortBy === 'connectors') return b.connectors - a.connectors;
+                if (sortBy === 'alpha') return a.name.localeCompare(b.name);
+                return 0;
+            });
+
+            const tbody = document.getElementById('team-table-body');
+            tbody.innerHTML = '';
+
+            filtered.forEach(member => {
+                const row = tbody.insertRow();
+                row.className = 'clickable-row';
+                row.onclick = () => showTeamDetail(member);
+
+                row.innerHTML = `
+                    <td><strong>${member.name}</strong></td>
+                    <td>${member.role}</td>
+                    <td>${member.location}</td>
+                    <td>${member.connectors}</td>
+                    <td>${member.firms}</td>
+                    <td>${member.prospects}</td>
+                `;
+            });
+
+            // Update stats
+            const totalReach = filtered.reduce((sum, m) => sum + m.prospects, 0);
+            const avgReach = filtered.length > 0 ? Math.round(totalReach / filtered.length) : 0;
+
+            document.getElementById('team-stats').innerHTML = `
+                <div class="stat">
+                    <span class="stat-value">${toolData.teamMembers.length}</span>
+                    <span class="stat-label">Team Members</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-value">${avgReach}</span>
+                    <span class="stat-label">Avg Reach</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-value">${totalReach}</span>
+                    <span class="stat-label">Total Reach</span>
+                </div>
+            `;
+        }
+
+        // ========== DETAIL MODALS ==========
+        function showFirmDetail(firm) {
+            const contacts = toolData.prospects.filter(p => p.firmId === firm.id);
+            const paths = toolData.relationships.filter(r => r.firmId === firm.id);
+
+            let pathsHTML = '';
+            if (paths.length > 0) {
+                pathsHTML = `
+                    <div class="detail-section">
+                        <h3>🔗 Warm Introduction Paths (${paths.length})</h3>
+                        <div class="path-list">
+                            ${paths.map(p => {
+                                const team = toolData.teamMembers.find(t => t.id === p.teamMemberId);
+                                const connector = toolData.mutualConnections.find(c => c.id === p.connectorId);
+                                const prospect = toolData.prospects.find(pr => pr.id === p.prospectId);
+                                return `
+                                    <div class="path-item">
+                                        <div class="path-chain">${team?.name} → ${connector?.name} → ${prospect?.name}</div>
+                                        <div class="path-details">${connector?.title}, ${connector?.company}</div>
+                                    </div>
+                                `;
+                            }).join('')}
+                        </div>
+                    </div>
+                `;
+            } else {
+                pathsHTML = `
+                    <div class="detail-section">
+                        <h3>🔗 Warm Introduction Paths</h3>
+                        <div class="no-paths">No warm introduction paths found. Consider cold outreach or seeking 2nd degree connections.</div>
+                    </div>
+                `;
+            }
+
+            document.getElementById('modal-name').textContent = firm.name;
+            document.getElementById('modal-subtitle').textContent = `${firm.type} • ${firm.location}`;
+            document.getElementById('modal-body').innerHTML = `
+                <div class="detail-section">
+                    <h3>Overview</h3>
+                    <p><strong>AUM:</strong> ${formatAUM(firm.aum)}</p>
+                    <p><strong>Status:</strong> <span class="badge badge-${firm.status.replace(/_/g, '-')}">${firm.status.replace(/_/g, ' ')}</span></p>
+                    ${firm.website ? `<p><strong>Website:</strong> <a href="${firm.website}" target="_blank">${firm.website}</a></p>` : ''}
+                </div>
+                ${firm.description ? `
+                    <div class="detail-section">
+                        <h3>Description</h3>
+                        <p>${firm.description}</p>
+                    </div>
+                ` : ''}
+                ${contacts.length > 0 ? `
+                    <div class="detail-section">
+                        <h3>Contacts (${contacts.length})</h3>
+                        ${contacts.map(c => `
+                            <div class="contact-card">
+                                <div class="contact-name">${c.name}</div>
+                                <div class="contact-title">${c.title}</div>
+                                ${c.email ? `<p>📧 ${c.email}</p>` : ''}
+                                ${c.linkedin ? `<p>🔗 <a href="${c.linkedin}" target="_blank">LinkedIn</a></p>` : ''}
+                            </div>
+                        `).join('')}
+                    </div>
+                ` : ''}
+                ${pathsHTML}
+                ${firm.notes ? `
+                    <div class="detail-section">
+                        <h3>Notes</h3>
+                        <p>${firm.notes}</p>
+                    </div>
+                ` : ''}
+            `;
+
+            document.getElementById('detail-modal').style.display = 'block';
+        }
+
+        function showConnectorInfo(connectorId) {
+            const connector = toolData.mutualConnections.find(c => c.id === connectorId);
+            if (!connector) return;
+
+            const paths = toolData.relationships.filter(r => r.connectorId === connectorId);
+            const uniqueFirms = new Set(paths.map(r => r.firmId));
+            const uniqueProspects = new Set(paths.map(r => r.prospectId));
+
+            const modalBody = `
+                <div class="detail-section">
+                    <h3>Role & Company</h3>
+                    <p><strong>${connector.title}</strong>${connector.company ? ` at ${connector.company}` : ''}</p>
+                </div>
+                <div class="detail-section">
+                    <h3>Reach Statistics</h3>
+                    <p>Can connect to <strong>${uniqueProspects.size} prospects</strong> at <strong>${uniqueFirms.size} firms</strong></p>
+                    <p>Total relationship paths: <strong>${paths.length}</strong></p>
+                </div>
+                <div class="detail-section">
+                    <h3>Known By (FourBridge Team)</h3>
+                    <div style="background: #f8f9fa; padding: 15px; border-radius: 8px;">
+                        ${connector.teamConnections && connector.teamConnections.length > 0 ? 
+                            connector.teamConnections.map(tc => `<div style="margin: 8px 0;">• ${tc}</div>`).join('') :
+                            '<p style="color: #6c757d; font-style: italic;">No team connections listed</p>'}
+                    </div>
+                </div>
+                <div class="detail-section">
+                    <h3>Can Introduce To</h3>
+                    <div style="max-height: 400px; overflow-y: auto;">
+                        ${paths.map(r => {
+                            const prospect = toolData.prospects.find(p => p.id === r.prospectId);
+                            const firm = toolData.firms.find(f => f.id === r.firmId);
+                            if (!prospect || !firm) return '';
+                            return `
+                                <div style="padding: 10px; margin: 8px 0; background: #f8f9fa; border-left: 3px solid #5FC4B8; border-radius: 4px; cursor: pointer;" onclick="showProspectDetail(${JSON.stringify(prospect).replace(/"/g, '&quot;')})">
+                                    <div style="font-weight: 600; color: #2d3748;">${prospect.name}</div>
+                                    <div style="color: #6c757d; font-size: 14px; margin-top: 4px;">${prospect.title} at ${firm.name}</div>
+                                </div>
+                            `;
+                        }).join('')}
+                    </div>
+                </div>
+            `;
+
+            document.getElementById('modal-name').textContent = connector.name;
+            document.getElementById('modal-body').innerHTML = modalBody;
+            document.getElementById('detail-modal').style.display = 'block';
+        }
+
+        function showProspectDetail(prospect) {
+            const firm = toolData.firms.find(f => f.id === prospect.firmId);
+            const paths = toolData.relationships.filter(r => r.prospectId === prospect.id);
+
+            let pathsHTML = '';
+            if (paths.length > 0) {
+                pathsHTML = `
+                    <div class="detail-section">
+                        <h3>🔗 Warm Introduction Paths (${paths.length})</h3>
+                        <div class="path-list">
+                            ${paths.map(p => {
+                                const team = toolData.teamMembers.find(t => t.id === p.teamMemberId);
+                                const connector = toolData.mutualConnections.find(c => c.id === p.connectorId);
+                                return `
+                                    <div class="path-item">
+                                        <div class="path-chain">${team?.name} → ${connector?.name} → ${prospect.name}</div>
+                                        <div class="path-details">${connector?.title}, ${connector?.company}</div>
+                                    </div>
+                                `;
+                            }).join('')}
+                        </div>
+                    </div>
+                `;
+            } else {
+                pathsHTML = `
+                    <div class="detail-section">
+                        <h3>🔗 Warm Introduction Paths</h3>
+                        <div class="no-paths">No warm introduction paths found.</div>
+                    </div>
+                `;
+            }
+
+            document.getElementById('modal-name').textContent = prospect.name;
+            document.getElementById('modal-subtitle').textContent = prospect.title;
+            document.getElementById('modal-body').innerHTML = `
+                <div class="detail-section">
+                    <h3>Organization</h3>
+                    <p><strong>${prospect.firmName}</strong></p>
+                    ${firm ? `
+                        <p>${firm.type} • ${firm.location}</p>
+                        <p><strong>AUM:</strong> ${formatAUM(firm.aum)}</p>
+                    ` : ''}
+                </div>
+                ${pathsHTML}
+                <div class="detail-section">
+                    <h3>Contact Information</h3>
+                    ${prospect.email ? `<p>📧 ${prospect.email}</p>` : ''}
+                    ${prospect.phone ? `<p>📞 ${prospect.phone}</p>` : ''}
+                    ${prospect.linkedin ? `<p>🔗 <a href="${prospect.linkedin}" target="_blank">LinkedIn Profile</a></p>` : ''}
+                </div>
+            `;
+
+            document.getElementById('detail-modal').style.display = 'block';
+        }
+
+        function showTeamDetail(member) {
+            const rels = toolData.relationships.filter(r => r.teamMemberId === member.id);
+            const uniqueConnectors = [...new Set(rels.map(r => r.connectorId))];
+            const uniqueFirms = [...new Set(rels.map(r => r.firmId).filter(id => id))];
+            const uniqueProspects = [...new Set(rels.map(r => r.prospectId))];
+
+            document.getElementById('modal-name').textContent = member.name;
+            document.getElementById('modal-subtitle').textContent = member.role;
+            document.getElementById('modal-body').innerHTML = `
+                <div class="detail-section">
+                    <h3>Network Reach</h3>
+                    <p><strong>Connectors:</strong> ${uniqueConnectors.length}</p>
+                    <p><strong>Firms Reachable:</strong> ${uniqueFirms.length}</p>
+                    <p><strong>Prospects Reachable:</strong> ${uniqueProspects.length}</p>
+                </div>
+                <div class="detail-section">
+                    <h3>Contact</h3>
+                    ${member.email ? `<p>📧 ${member.email}</p>` : ''}
+                    ${member.phone ? `<p>📞 ${member.phone}</p>` : ''}
+                    ${member.linkedin ? `<p>🔗 <a href="${member.linkedin}" target="_blank">LinkedIn Profile</a></p>` : ''}
+                </div>
+                <div class="detail-section">
+                    <h3>Top Connectors</h3>
+                    ${uniqueConnectors.slice(0, 10).map(cId => {
+                        const connector = toolData.mutualConnections.find(c => c.id === cId);
+                        const count = rels.filter(r => r.connectorId === cId).length;
+                        return `<p>• ${connector?.name} (${count} connections)</p>`;
+                    }).join('')}
+                </div>
+            `;
+
+            document.getElementById('detail-modal').style.display = 'block';
+        }
+
+        function closeModal(event) {
+            if (!event || event.target.id === 'detail-modal') {
+                document.getElementById('detail-modal').style.display = 'none';
+            }
+        }
+
+        // ========== UTILITY FUNCTIONS ==========
+        function formatAUM(aum) {
+            if (!aum || aum === 0) return 'N/A';
+            if (aum >= 1000) return `$${(aum / 1000).toFixed(1)}B`;
+            return `$${aum.toFixed(0)}M`;
+        }
+
+        function sortProspectsTable(col) {
+            // Implement sorting logic
+        }
+
+        function sortProspectsPeopleTable(col) {
+            // Implement sorting logic
+        }
+
+        function sortFirmsTable(col) {
+            // Implement sorting logic
+        }
+
+        function sortTeamTable(col) {
+            // Implement sorting logic
+        }
+
+        // ========== START APPLICATION ==========
+        window.onload = initializeApp;
+    </script>
+</body>
+</html>
