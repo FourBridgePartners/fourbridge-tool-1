@@ -1,0 +1,4147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FourBridge Relationship Intelligence System</title>
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #004D4D 0%, #00665C 100%);
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #004D4D 0%, #00564D 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .header h1 {
+            font-size: 42px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            color: #5FC4B8;
+            letter-spacing: 1px;
+        }
+
+        .header p {
+            font-size: 16px;
+            opacity: 0.9;
+            margin-bottom: 25px;
+            color: white;
+            letter-spacing: 0.5px;
+        }
+
+        .tabs {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+
+        .tab {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: 2px solid rgba(255,255,255,0.3);
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 15px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .tab:hover {
+            background: rgba(255,255,255,0.3);
+            transform: translateY(-2px);
+        }
+
+        .tab.active {
+            background: white;
+            color: #004D4D;
+            border-color: white;
+        }
+
+        /* Segmented Control Toggle */
+        .segmented-control {
+            display: inline-flex;
+            background: #e9ecef;
+            border-radius: 10px;
+            padding: 4px;
+            gap: 4px;
+        }
+
+        .segmented-control button {
+            background: transparent;
+            border: none;
+            padding: 10px 24px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            color: #6c757d;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .segmented-control button:hover {
+            color: #004D4D;
+            background: rgba(255,255,255,0.5);
+        }
+
+        .segmented-control button.active {
+            background: white;
+            color: #004D4D;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .segmented-control button .icon {
+            font-size: 16px;
+        }
+
+        /* Loading Screen */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 77, 77, 0.95);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            flex-direction: column;
+            color: white;
+        }
+
+        .loading-spinner {
+            width: 60px;
+            height: 60px;
+            border: 5px solid rgba(95, 196, 184, 0.3);
+            border-top-color: #5FC4B8;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .loading-details {
+            font-size: 14px;
+            opacity: 0.8;
+            max-width: 600px;
+            text-align: center;
+            padding: 0 20px;
+        }
+
+        .loading-log {
+            margin-top: 20px;
+            max-width: 700px;
+            max-height: 300px;
+            overflow-y: auto;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 15px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            text-align: left;
+        }
+
+        .log-entry {
+            margin: 4px 0;
+            padding: 4px 0;
+        }
+
+        .log-success { color: #5FC4B8; }
+        .log-warning { color: #ffc107; }
+        .log-error { color: #ff6b6b; }
+        .log-info { color: #e0e0e0; }
+
+        .view {
+            display: none;
+            padding: 30px;
+        }
+
+        .view.active {
+            display: block;
+        }
+
+        .info-tip {
+            background: #e8f5f3;
+            border-left: 4px solid #5FC4B8;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            color: #004D4D;
+        }
+
+        .filter-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .filter-group label {
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            color: #6c757d;
+            margin-bottom: 6px;
+            letter-spacing: 0.5px;
+        }
+
+        input[type="text"], select {
+            padding: 10px 12px;
+            border: 2px solid #dee2e6;
+            border-radius: 6px;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+
+        input[type="text"]:focus, select:focus {
+            outline: none;
+            border-color: #5FC4B8;
+            box-shadow: 0 0 0 3px rgba(95, 196, 184, 0.1);
+        }
+
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .stat {
+            text-align: center;
+            min-width: 120px;
+        }
+
+        .stat-value {
+            font-size: 32px;
+            font-weight: 700;
+            color: #5FC4B8;
+            display: block;
+        }
+
+        .stat-label {
+            font-size: 13px;
+            color: #6c757d;
+            text-transform: uppercase;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            margin-top: 5px;
+        }
+
+        .table-container {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            background: white;
+        }
+
+        thead {
+            background: #2d3748;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        th {
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 12px;
+            letter-spacing: 0.5px;
+            color: white;
+            border-bottom: 2px solid #1a202c;
+            cursor: pointer;
+            user-select: none;
+            white-space: nowrap;
+        }
+
+        th:hover {
+            background: #1a202c;
+        }
+
+        th.sorted-asc::after {
+            content: " ↑";
+            color: #5FC4B8;
+        }
+
+        th.sorted-desc::after {
+            content: " ↓";
+            color: #5FC4B8;
+        }
+
+        td {
+            padding: 15px;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        /* Zebra striping */
+        tbody tr:nth-child(odd) {
+            background: #fafbfc;
+        }
+        
+        tbody tr:nth-child(even) {
+            background: white;
+        }
+
+        tbody tr {
+            transition: all 0.2s;
+        }
+
+        tbody tr:hover {
+            background: #f0f7f6 !important;
+        }
+        
+        .clickable-row {
+            cursor: pointer;
+        }
+        
+        .clickable-row:hover {
+            background: #f0f4f8 !important;
+        }
+        
+        tbody tr:hover td strong {
+            text-decoration: underline;
+            color: #5FC4B8;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            white-space: nowrap;
+        }
+
+        .badge-sfo, .badge-single-family-office {
+            background: #e7f3ff;
+            color: #0066cc;
+        }
+
+        .badge-mfo, .badge-multi-family-office {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .badge-foundation {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .badge-endowment {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .badge-target, .badge-target_prospect {
+            background: #ff6b6b;
+            color: white;
+        }
+
+        .badge-cold, .badge-cold_lead {
+            background: #e9ecef;
+            color: #495057;
+        }
+
+        .badge-past, .badge-past_contact {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        /* Tiered Warm Path Badges */
+        .badge-paths-low {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .badge-paths-medium {
+            background: #28a745;
+            color: white;
+        }
+        
+        .badge-paths-high {
+            background: #155724;
+            color: white;
+            box-shadow: 0 0 8px rgba(21, 87, 36, 0.4);
+        }
+
+        /* Footer */
+        .app-footer {
+            background: #f8f9fa;
+            border-top: 1px solid #e9ecef;
+            padding: 15px 30px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 20px;
+            font-size: 13px;
+            color: #6c757d;
+        }
+        
+        .app-footer span {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .footer-divider {
+            color: #dee2e6;
+        }
+        
+        .footer-highlight {
+            color: #5FC4B8;
+            font-weight: 600;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.6);
+            z-index: 1000;
+            overflow-y: auto;
+            padding: 20px;
+        }
+
+        .modal-content {
+            background: white;
+            max-width: 900px;
+            margin: 50px auto;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            position: relative;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            background: linear-gradient(135deg, #004D4D 0%, #00564D 100%);
+            color: white;
+            padding: 25px 30px;
+            border-radius: 12px 12px 0 0;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .modal-header h2 {
+            font-size: 22px;
+            margin: 0;
+        }
+
+        .modal-subtitle {
+            font-size: 14px;
+            opacity: 0.9;
+            margin-top: 5px;
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 20px;
+            right: 25px;
+            font-size: 32px;
+            color: white;
+            cursor: pointer;
+            line-height: 1;
+            transition: transform 0.2s;
+        }
+
+        .close-btn:hover {
+            transform: scale(1.2);
+        }
+
+        .btn-info {
+            background: #5FC4B8;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-info:hover {
+            background: #004D4D;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(95, 196, 184, 0.3);
+        }
+
+        .modal-body {
+            padding: 30px;
+        }
+
+        .detail-section {
+            margin-bottom: 25px;
+        }
+
+        .detail-section h3 {
+            font-size: 16px;
+            color: #495057;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+
+        .detail-section p {
+            color: #6c757d;
+            line-height: 1.6;
+        }
+
+        .contact-card {
+            background: white;
+            border: 2px solid #e9ecef;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 15px;
+            transition: all 0.3s;
+        }
+
+        .contact-card:hover {
+            border-color: #5FC4B8;
+            box-shadow: 0 4px 12px rgba(95, 196, 184, 0.15);
+        }
+
+        .contact-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 15px;
+        }
+
+        .contact-name {
+            font-size: 18px;
+            font-weight: 700;
+            color: #2d3748;
+            margin-bottom: 4px;
+        }
+
+        .contact-title {
+            font-size: 14px;
+            color: #6c757d;
+            font-style: italic;
+        }
+
+        .path-indicator {
+            background: #d4edda;
+            color: #155724;
+            padding: 6px 12px;
+            border-radius: 16px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .path-list {
+            margin-top: 10px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+
+        .path-item {
+            padding: 10px;
+            margin: 8px 0;
+            background: white;
+            border-left: 3px solid #28a745;
+            border-radius: 6px;
+        }
+
+        .path-item.medium {
+            border-left-color: #ffc107;
+        }
+
+        .path-item.weak {
+            border-left-color: #dc3545;
+        }
+
+        .path-chain {
+            font-size: 14px;
+            color: #2d3748;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .path-details {
+            font-size: 12px;
+            color: #6c757d;
+        }
+
+        .no-paths {
+            background: #fff3cd;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #ffc107;
+            color: #856404;
+        }
+
+        /* Best Connectors Section */
+        .best-connectors {
+            background: linear-gradient(135deg, #f8fffe 0%, #f0faf9 100%);
+            border: 2px solid #5FC4B8;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .best-connector-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            padding: 15px;
+            margin: 10px 0;
+            background: white;
+            border-radius: 8px;
+            border-left: 4px solid #5FC4B8;
+        }
+
+        .best-connector-item.top-connector {
+            border-left-color: #FFD700;
+            background: linear-gradient(135deg, #fffef5 0%, #fffde8 100%);
+        }
+
+        .best-connector-info {
+            flex: 1;
+        }
+
+        .best-connector-name {
+            font-weight: 700;
+            color: #2d3748;
+            font-size: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .best-connector-title {
+            font-size: 13px;
+            color: #6c757d;
+            margin-top: 4px;
+        }
+
+        .best-connector-reaches {
+            font-size: 12px;
+            color: #5FC4B8;
+            margin-top: 6px;
+        }
+
+        .best-connector-stat {
+            text-align: right;
+            padding-left: 15px;
+        }
+
+        .best-connector-count {
+            font-size: 20px;
+            font-weight: 700;
+            color: #5FC4B8;
+        }
+
+        .best-connector-label {
+            font-size: 11px;
+            color: #6c757d;
+            text-transform: uppercase;
+        }
+
+        /* Sankey Chart */
+        .sankey-container {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 2px solid #e9ecef;
+        }
+
+        .sankey-controls {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+
+        .sankey-filter-btn {
+            padding: 6px 12px;
+            border: 1px solid #dee2e6;
+            border-radius: 20px;
+            background: white;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+            color: #6c757d;
+        }
+
+        .sankey-filter-btn:hover {
+            border-color: #5FC4B8;
+            color: #5FC4B8;
+        }
+
+        .sankey-filter-btn.active {
+            background: #5FC4B8;
+            border-color: #5FC4B8;
+            color: white;
+        }
+
+        .sankey-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .sankey-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: #2d3748;
+        }
+
+        .sankey-subtitle {
+            font-size: 13px;
+            color: #6c757d;
+            margin-top: 4px;
+        }
+
+        #sankey-chart {
+            width: 100%;
+            height: 280px;
+        }
+
+        /* Contacts View Toggle */
+        .contacts-view-toggle {
+            display: flex;
+            gap: 0;
+            margin-bottom: 15px;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            overflow: hidden;
+            width: fit-content;
+        }
+
+        .view-toggle-btn {
+            padding: 8px 16px;
+            border: none;
+            background: white;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.2s;
+            color: #6c757d;
+        }
+
+        .view-toggle-btn:hover {
+            background: #f8f9fa;
+        }
+
+        .view-toggle-btn.active {
+            background: #004D4D;
+            color: white;
+        }
+
+        /* Connector Group Card (for View by Connector) */
+        .connector-group-card {
+            background: white;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            margin-bottom: 12px;
+            overflow: hidden;
+            transition: all 0.2s;
+        }
+
+        .connector-group-card:hover {
+            border-color: #5FC4B8;
+        }
+
+        .connector-group-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            cursor: pointer;
+            background: #f8f9fa;
+        }
+
+        .connector-group-header:hover {
+            background: #f0f7f6;
+        }
+
+        .connector-group-info {
+            flex: 1;
+        }
+
+        .connector-group-name {
+            font-weight: 700;
+            color: #2d3748;
+            font-size: 15px;
+        }
+
+        .connector-group-title {
+            font-size: 13px;
+            color: #6c757d;
+            margin-top: 2px;
+        }
+
+        .connector-group-meta {
+            font-size: 12px;
+            color: #5FC4B8;
+            margin-top: 4px;
+        }
+
+        .connector-group-stats {
+            text-align: right;
+            padding-left: 15px;
+        }
+
+        .connector-group-count {
+            font-size: 24px;
+            font-weight: 700;
+            color: #5FC4B8;
+        }
+
+        .connector-group-label {
+            font-size: 11px;
+            color: #6c757d;
+            text-transform: uppercase;
+        }
+
+        .connector-group-contacts {
+            display: none;
+            padding: 15px;
+            background: white;
+            border-top: 1px solid #e9ecef;
+        }
+
+        .connector-group-card.expanded .connector-group-contacts {
+            display: block;
+        }
+
+        .connector-contact-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 12px;
+            background: #f8f9fa;
+            border-radius: 6px;
+            margin-bottom: 8px;
+            border-left: 3px solid #5FC4B8;
+        }
+
+        .connector-contact-name {
+            font-weight: 600;
+            color: #2d3748;
+        }
+
+        .connector-contact-title {
+            font-size: 12px;
+            color: #6c757d;
+        }
+
+        /* Multi-path highlight */
+        .multi-path-badge {
+            background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+            color: #000;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        /* Save Path Button */
+        .save-path-btn {
+            background: transparent;
+            border: 1px solid #dee2e6;
+            border-radius: 6px;
+            padding: 6px 10px;
+            font-size: 12px;
+            color: #6c757d;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .save-path-btn:hover {
+            background: #f8f9fa;
+            border-color: #5FC4B8;
+            color: #5FC4B8;
+        }
+
+        .save-path-btn.saved {
+            background: #d4edda;
+            border-color: #28a745;
+            color: #155724;
+        }
+
+        .save-path-btn.saved:hover {
+            background: #c3e6cb;
+        }
+
+        /* Saved Paths Panel */
+        .saved-paths-panel {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.2);
+            width: 350px;
+            max-height: 500px;
+            z-index: 999;
+            overflow: hidden;
+            display: none;
+        }
+
+        .saved-paths-panel.visible {
+            display: block;
+        }
+
+        .saved-paths-header {
+            background: linear-gradient(135deg, #004D4D 0%, #00564D 100%);
+            color: white;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .saved-paths-header h3 {
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        .saved-paths-body {
+            max-height: 350px;
+            overflow-y: auto;
+            padding: 15px;
+        }
+
+        .saved-path-item {
+            background: #f8f9fa;
+            border-left: 3px solid #5FC4B8;
+            padding: 12px;
+            margin-bottom: 10px;
+            border-radius: 6px;
+            position: relative;
+        }
+
+        .saved-path-firm {
+            font-size: 11px;
+            text-transform: uppercase;
+            color: #6c757d;
+            margin-bottom: 4px;
+        }
+
+        .saved-path-chain {
+            font-size: 14px;
+            font-weight: 600;
+            color: #2d3748;
+        }
+
+        .saved-path-remove {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background: transparent;
+            border: none;
+            color: #dc3545;
+            cursor: pointer;
+            font-size: 16px;
+            opacity: 0.5;
+        }
+
+        .saved-path-remove:hover {
+            opacity: 1;
+        }
+
+        .saved-paths-footer {
+            padding: 15px;
+            border-top: 1px solid #e9ecef;
+            display: flex;
+            gap: 10px;
+        }
+
+        .saved-paths-footer button {
+            flex: 1;
+            padding: 10px;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-export {
+            background: #5FC4B8;
+            color: white;
+            border: none;
+        }
+
+        .btn-export:hover {
+            background: #4db3a7;
+        }
+
+        .btn-clear {
+            background: white;
+            color: #dc3545;
+            border: 1px solid #dc3545;
+        }
+
+        .btn-clear:hover {
+            background: #dc3545;
+            color: white;
+        }
+
+        /* Floating Save Button */
+        .saved-paths-toggle {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: linear-gradient(135deg, #004D4D 0%, #00564D 100%);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            padding: 12px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            z-index: 998;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s;
+        }
+
+        .saved-paths-toggle:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.4);
+        }
+
+        .saved-paths-toggle .count {
+            background: #5FC4B8;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+        }
+
+        /* Collapsible Contact Cards */
+        .contact-card-collapsible {
+            background: white;
+            border: 2px solid #e9ecef;
+            border-radius: 12px;
+            margin-bottom: 12px;
+            overflow: hidden;
+            transition: all 0.3s;
+        }
+
+        .contact-card-collapsible:hover {
+            border-color: #5FC4B8;
+        }
+
+        .contact-card-header-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 20px;
+            cursor: pointer;
+            user-select: none;
+            transition: background 0.2s;
+        }
+
+        .contact-card-header-row:hover {
+            background: #f8f9fa;
+        }
+
+        .contact-card-left {
+            flex: 1;
+        }
+
+        .contact-card-right {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .contact-path-count {
+            background: #e8f5f3;
+            color: #004D4D;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .contact-path-count.has-paths {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .contact-expand-icon {
+            color: #6c757d;
+            font-size: 12px;
+            transition: transform 0.3s;
+        }
+
+        .contact-card-collapsible.expanded .contact-expand-icon {
+            transform: rotate(180deg);
+        }
+
+        .contact-paths-container {
+            display: none;
+            padding: 0 20px 20px 20px;
+            background: #fafbfc;
+            border-top: 1px solid #e9ecef;
+        }
+
+        .contact-card-collapsible.expanded .contact-paths-container {
+            display: block;
+        }
+
+        .contact-paths-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .mini-path-item {
+            display: flex;
+            align-items: center;
+            padding: 10px 12px;
+            background: white;
+            border-radius: 6px;
+            border-left: 3px solid #5FC4B8;
+            font-size: 13px;
+        }
+
+        .mini-path-item .connector-name {
+            font-weight: 600;
+            color: #2d3748;
+        }
+
+        .mini-path-item .connector-detail {
+            color: #6c757d;
+            font-size: 11px;
+            margin-top: 2px;
+        }
+
+        .profile-card {
+            background: white;
+            border: 2px solid #e9ecef;
+            border-radius: 12px;
+            margin-bottom: 16px;
+            overflow: hidden;
+            transition: all 0.3s;
+        }
+
+        .profile-card:hover {
+            border-color: #5FC4B8;
+            box-shadow: 0 4px 12px rgba(95, 196, 184, 0.15);
+        }
+
+        .profile-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px;
+            cursor: pointer;
+            user-select: none;
+            background: white;
+            border-bottom: 2px solid #e9ecef;
+        }
+
+        .profile-card-header:hover {
+            background: #f8f9fa;
+        }
+
+        .profile-info {
+            flex: 1;
+        }
+
+        .profile-name {
+            font-size: 18px;
+            font-weight: 700;
+            color: #2d3748;
+            margin-bottom: 4px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .profile-role {
+            font-size: 14px;
+            color: #6c757d;
+            font-style: italic;
+        }
+
+        .profile-actions {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .expand-icon {
+            font-size: 24px;
+            color: #5FC4B8;
+            transition: transform 0.3s;
+        }
+
+        .profile-card.expanded .expand-icon {
+            transform: rotate(180deg);
+        }
+
+        .profile-body {
+            display: none;
+            padding: 20px;
+            background: #f8f9fa;
+        }
+
+        .profile-card.expanded .profile-body {
+            display: block;
+        }
+
+        /* Simple List View Styles */
+        .connector-list-item {
+            background: white;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            margin-bottom: 12px;
+            overflow: hidden;
+            transition: all 0.2s;
+        }
+
+        .connector-list-item:hover {
+            border-color: #5FC4B8;
+        }
+
+        .connector-list-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 20px;
+            cursor: pointer;
+            background: #f8f9fa;
+            transition: background 0.2s;
+        }
+
+        .connector-list-header:hover {
+            background: #f0f7f6;
+        }
+
+        .connector-list-name {
+            font-size: 16px;
+            font-weight: 700;
+            color: #2d3748;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .connector-list-role {
+            font-size: 13px;
+            color: #6c757d;
+            margin-top: 4px;
+        }
+
+        .connector-list-expand {
+            color: #5FC4B8;
+            font-size: 14px;
+            transition: transform 0.2s;
+        }
+
+        .connector-list-item.expanded .connector-list-expand {
+            transform: rotate(180deg);
+        }
+
+        .connector-list-prospects {
+            display: none;
+            flex-direction: column;
+            gap: 8px;
+            padding: 15px 20px;
+            background: white;
+            border-top: 1px solid #e9ecef;
+        }
+
+        .connector-list-item.expanded .connector-list-prospects {
+            display: flex;
+        }
+
+        /* Team Member Filter Buttons */
+        .team-filter-container {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .team-filter-label {
+            font-size: 12px;
+            font-weight: 600;
+            color: #6c757d;
+            text-transform: uppercase;
+            margin-right: 8px;
+        }
+
+        .team-filter-btn {
+            padding: 6px 14px;
+            border: 1px solid #dee2e6;
+            border-radius: 20px;
+            background: white;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+            color: #6c757d;
+        }
+
+        .team-filter-btn:hover {
+            border-color: #5FC4B8;
+            color: #5FC4B8;
+        }
+
+        .team-filter-btn.active {
+            background: #004D4D;
+            border-color: #004D4D;
+            color: white;
+        }
+
+        /* Overlapping connection highlight */
+        .overlap-badge {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            margin-left: 8px;
+        }
+
+        .connector-prospect-item {
+            padding: 10px 15px;
+            background: #f8f9fa;
+            border-left: 3px solid #5FC4B8;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .connector-prospect-item:hover {
+            background: #e9ecef;
+            border-left-color: #004D4D;
+            transform: translateX(5px);
+        }
+
+        .connector-prospect-firm {
+            font-weight: 600;
+            color: #2d3748;
+        }
+
+        .connector-prospect-name {
+            color: #6c757d;
+            margin-left: 8px;
+        }
+
+        .connector-prospect-meta {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 12px;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 28px;
+            }
+
+            .filter-row {
+                grid-template-columns: 1fr;
+            }
+
+            .stats {
+                flex-direction: column;
+            }
+
+            table {
+                font-size: 12px;
+            }
+
+            th, td {
+                padding: 10px;
+            }
+
+            .modal-content {
+                margin: 20px auto;
+            }
+
+            .profile-card-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+
+            .profile-actions {
+                width: 100%;
+                justify-content: space-between;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- LOADING OVERLAY -->
+    <div class="loading-overlay" id="loading-overlay">
+        <div class="loading-spinner"></div>
+        <div class="loading-text">🔄 Loading FourBridge Data from Google Sheets...</div>
+        <div class="loading-details">Fetching firms, prospects, connections, and team data...</div>
+        <div class="loading-log" id="loading-log"></div>
+    </div>
+
+    <div class="container">
+        <div class="header">
+            <h1>FourBridge</h1>
+            <p>Relationship Intelligence System</p>
+            <div class="tabs">
+                <button class="tab active" onclick="switchView('prospects')">📊 Prospects</button>
+                <button class="tab" onclick="switchView('connections')">🤝 Connections</button>
+                <button class="tab" onclick="switchView('firms')">📁 Firms Database</button>
+                <button class="tab" onclick="switchView('team')">👥 Team</button>
+            </div>
+        </div>
+
+        <!-- PROSPECTS VIEW -->
+        <div id="prospects-view" class="view active">
+            <div class="info-tip">
+                💡 <strong>Prospects View:</strong> Target people and firms we want to reach. Toggle between people-focused and firm-focused views below.
+            </div>
+
+            <div style="display: flex; justify-content: center; margin-bottom: 25px;">
+                <div class="segmented-control">
+                    <button id="view-people-btn" onclick="setProspectsViewMode('people')">
+                        <span class="icon">👤</span> People
+                    </button>
+                    <button id="view-firms-btn" class="active" onclick="setProspectsViewMode('firms')">
+                        <span class="icon">🏢</span> Firms
+                    </button>
+                </div>
+            </div>
+
+            <div class="filter-row">
+                <div class="filter-group">
+                    <label>Search</label>
+                    <input type="text" id="prospects-search" placeholder="Search names, firms, titles...">
+                </div>
+                <div class="filter-group">
+                    <label>Organization Type</label>
+                    <select id="prospects-type">
+                        <option value="">All Types</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label>State</label>
+                    <select id="prospects-location">
+                        <option value="">All States</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label>Connection Status</label>
+                    <select id="prospects-connection">
+                        <option value="">All</option>
+                        <option value="yes">With Warm Paths</option>
+                        <option value="no">No Connections</option>
+                    </select>
+                </div>
+                <div class="filter-group" id="decision-maker-filter-group" style="display: none;">
+                    <label>Decision Maker</label>
+                    <select id="prospects-decision-maker">
+                        <option value="">All</option>
+                        <option value="yes">Decision Makers Only</option>
+                        <option value="no">Non-Decision Makers</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="stats" id="prospects-stats"></div>
+
+            <div class="table-container" id="prospects-firms-table">
+                <table id="prospects-table">
+                    <thead>
+                        <tr>
+                            <th onclick="sortProspectsTable(0)">Firm Name</th>
+                            <th onclick="sortProspectsTable(1)">Type</th>
+                            <th onclick="sortProspectsTable(2)">Location</th>
+                            <th onclick="sortProspectsTable(3)">AUM</th>
+                            <th onclick="sortProspectsTable(4)">Contacts</th>
+                            <th onclick="sortProspectsTable(5)">Warm Paths</th>
+                            <th onclick="sortProspectsTable(6)">Priority</th>
+                        </tr>
+                    </thead>
+                    <tbody id="prospects-table-body"></tbody>
+                </table>
+            </div>
+
+            <div class="table-container" id="prospects-people-table-container" style="display: none;">
+                <table id="prospects-people-table">
+                    <thead>
+                        <tr>
+                            <th onclick="sortProspectsPeopleTable(0)">Prospect Name</th>
+                            <th onclick="sortProspectsPeopleTable(1)">Title</th>
+                            <th onclick="sortProspectsPeopleTable(2)">Firm</th>
+                            <th onclick="sortProspectsPeopleTable(3)">Type</th>
+                            <th onclick="sortProspectsPeopleTable(4)">Location</th>
+                            <th onclick="sortProspectsPeopleTable(5)">Status</th>
+                            <th onclick="sortProspectsPeopleTable(6)">Warm Paths</th>
+                        </tr>
+                    </thead>
+                    <tbody id="prospects-people-table-body"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- CONNECTIONS VIEW -->
+        <div id="connections-view" class="view">
+            <div class="info-tip">
+                💡 <strong>Connections View:</strong> Browse by mutual connections. Click connector names to expand and see prospects they can reach. Click "Info" to see which FourBridge team members know them.
+            </div>
+
+            <div class="filter-row">
+                <div class="filter-group">
+                    <label>Search Connectors</label>
+                    <input type="text" id="connections-search" placeholder="Search name or company...">
+                </div>
+                <div class="filter-group">
+                    <label>Team Member</label>
+                    <select id="connections-team-filter">
+                        <option value="">All Team</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label>Sort By</label>
+                    <select id="connections-sort">
+                        <option value="most">Most Connections</option>
+                        <option value="fewest">Fewest Connections</option>
+                        <option value="alpha">A-Z</option>
+                        <option value="alpha-desc">Z-A</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label>Display Style</label>
+                    <select id="connections-display">
+                        <option value="list">📋 Simple List</option>
+                        <option value="cards">🗂️ Detailed Cards</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="stats" id="connections-stats"></div>
+
+            <div id="connectors-display"></div>
+        </div>
+
+        <!-- FIRMS DATABASE VIEW -->
+        <div id="firms-view" class="view">
+            <div class="info-tip">
+                💡 <strong>Firms Database:</strong> Complete directory of all firms. This includes target prospects, past contacts, and cold leads. Click any firm to see full details and relationship map.
+            </div>
+
+            <div class="filter-row">
+                <div class="filter-group">
+                    <label>Search</label>
+                    <input type="text" id="firms-search" placeholder="Search firms...">
+                </div>
+                <div class="filter-group">
+                    <label>Type</label>
+                    <select id="firms-type">
+                        <option value="">All Types</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label>State</label>
+                    <select id="firms-location">
+                        <option value="">All States</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label>Status</label>
+                    <select id="firms-status">
+                        <option value="">All Status</option>
+                        <option value="target_prospect">Target Prospect</option>
+                        <option value="cold_lead">Cold Lead</option>
+                        <option value="past_contact">Past Contact</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="stats" id="firms-stats"></div>
+
+            <div class="table-container">
+                <table id="firms-table">
+                    <thead>
+                        <tr>
+                            <th onclick="sortFirmsTable(0)">Firm Name</th>
+                            <th onclick="sortFirmsTable(1)">Type</th>
+                            <th onclick="sortFirmsTable(2)">Location</th>
+                            <th onclick="sortFirmsTable(3)">AUM</th>
+                            <th onclick="sortFirmsTable(4)">Status</th>
+                            <th onclick="sortFirmsTable(5)">Contacts</th>
+                            <th onclick="sortFirmsTable(6)">Warm Paths</th>
+                        </tr>
+                    </thead>
+                    <tbody id="firms-table-body"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- TEAM DATABASE VIEW -->
+        <div id="team-view" class="view">
+            <div class="info-tip">
+                💡 <strong>Team Database:</strong> FourBridge team member profiles with network strength metrics. Click any team member to see their complete network map and reachable prospects.
+            </div>
+
+            <div class="filter-row">
+                <div class="filter-group">
+                    <label>Search Team</label>
+                    <input type="text" id="team-search" placeholder="Search name or role...">
+                </div>
+                <div class="filter-group">
+                    <label>Sort By</label>
+                    <select id="team-sort">
+                        <option value="reach">Most Reach</option>
+                        <option value="connectors">Most Connectors</option>
+                        <option value="alpha">A-Z</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="stats" id="team-stats"></div>
+
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th onclick="sortTeamTable(0)">Name</th>
+                            <th onclick="sortTeamTable(1)">Role</th>
+                            <th onclick="sortTeamTable(2)">Location</th>
+                            <th onclick="sortTeamTable(3)">Connectors</th>
+                            <th onclick="sortTeamTable(4)">Firms Reachable</th>
+                            <th onclick="sortTeamTable(5)">Prospects</th>
+                        </tr>
+                    </thead>
+                    <tbody id="team-table-body"></tbody>
+                </table>
+            </div>
+        </div>
+        
+        <!-- FOOTER -->
+        <div class="app-footer" id="app-footer">
+            <span>🔄 Last synced: <span id="footer-sync-time">just now</span></span>
+            <span class="footer-divider">•</span>
+            <span id="footer-version">v2025-12-03</span>
+            <span class="footer-divider">•</span>
+            <span><span class="footer-highlight" id="footer-firms">0</span> firms</span>
+            <span class="footer-divider">•</span>
+            <span><span class="footer-highlight" id="footer-reachable">0</span> reachable</span>
+        </div>
+    </div>
+
+    <!-- SAVED PATHS TOGGLE BUTTON -->
+    <button class="saved-paths-toggle" onclick="toggleSavedPathsPanel()">
+        ⭐ Saved Paths <span class="count" id="saved-paths-count">0</span>
+    </button>
+
+    <!-- SAVED PATHS PANEL -->
+    <div class="saved-paths-panel" id="saved-paths-panel">
+        <div class="saved-paths-header">
+            <h3>⭐ Saved Intro Paths</h3>
+            <button onclick="toggleSavedPathsPanel()" style="background: transparent; border: none; color: white; font-size: 20px; cursor: pointer;">&times;</button>
+        </div>
+        <div class="saved-paths-body" id="saved-paths-body">
+            <p style="color: #6c757d; text-align: center; padding: 20px;">No paths saved yet.<br>Click the ☆ icon on any connector to save.</p>
+        </div>
+        <div class="saved-paths-footer">
+            <button class="btn-export" onclick="exportSavedPaths()">📋 Copy for Sheets</button>
+            <button class="btn-clear" onclick="clearSavedPaths()">Clear All</button>
+        </div>
+    </div>
+
+    <!-- DETAIL MODAL -->
+    <div id="detail-modal" class="modal" onclick="closeModal(event)">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <div class="modal-header">
+                <span class="close-btn" onclick="closeModal()">&times;</span>
+                <h2 id="modal-name"></h2>
+                <div class="modal-subtitle" id="modal-subtitle"></div>
+            </div>
+            <div class="modal-body" id="modal-body"></div>
+        </div>
+    </div>
+
+    <script>
+        // ========== CONFIGURATION ==========
+        const SHEET_ID = '183HM7pUH-gdd4FXm94G05Bm0KJrfHioDU2Ti1GQiOWo';
+        const PUBLISHED_ID = '2PACX-1vQa6QC3ZJ9qU8KoypqBCBMsf68a8W7257eyTyk6nCIx4aRc54MPxtqwDBjjiDQxlhF5Y85_XT2ND-CK';
+        
+        // Tab GIDs from the actual Google Sheet
+        const SHEET_TABS = {
+            firms: { name: 'firms', gid: 0 },
+            team: { name: 'team', gid: 835603482 },
+            mutualConnections: { name: 'mutual connections', gid: 519427041 },
+            prospects: { name: 'prospects', gid: 857156726 }
+        };
+
+        // ========== GLOBAL DATA STORAGE ==========
+        let toolData = {
+            version: "2025-12-03-sankey-saved-paths",
+            lastUpdated: new Date().toISOString(),
+            firms: [],
+            prospects: [],
+            teamMembers: [],
+            mutualConnections: [],
+            relationships: []
+        };
+
+        // ========== LOGGING UTILITY ==========
+        function log(message, type = 'info') {
+            const logDiv = document.getElementById('loading-log');
+            const entry = document.createElement('div');
+            entry.className = `log-entry log-${type}`;
+            const timestamp = new Date().toLocaleTimeString();
+            entry.textContent = `[${timestamp}] ${message}`;
+            logDiv.appendChild(entry);
+            logDiv.scrollTop = logDiv.scrollHeight;
+            console.log(`[${type.toUpperCase()}] ${message}`);
+        }
+
+        // ========== NAME NORMALIZATION ==========
+        function normalizeName(name) {
+            if (!name) return '';
+            return name.toString().toLowerCase().trim().replace(/\s+/g, ' ');
+        }
+
+        // ========== STATE NORMALIZATION ==========
+        const CITY_TO_STATE = {
+            // Major cities
+            'new york': 'NY', 'nyc': 'NY', 'manhattan': 'NY', 'brooklyn': 'NY',
+            'los angeles': 'CA', 'la': 'CA', 'san francisco': 'CA', 'sf': 'CA', 'san diego': 'CA', 'palo alto': 'CA', 'silicon valley': 'CA', 'menlo park': 'CA',
+            'chicago': 'IL', 'highland park': 'IL',
+            'boston': 'MA', 'cambridge': 'MA',
+            'houston': 'TX', 'dallas': 'TX', 'austin': 'TX', 'san antonio': 'TX', 'fort worth': 'TX',
+            'philadelphia': 'PA', 'philly': 'PA', 'pittsburgh': 'PA',
+            'phoenix': 'AZ', 'scottsdale': 'AZ',
+            'seattle': 'WA', 'bellevue': 'WA',
+            'denver': 'CO', 'boulder': 'CO',
+            'atlanta': 'GA',
+            'miami': 'FL', 'ft. lauderdale': 'FL', 'fort lauderdale': 'FL', 'palm beach': 'FL', 'tampa': 'FL', 'jacksonville': 'FL', 'orlando': 'FL',
+            'detroit': 'MI', 'ann arbor': 'MI', 'grand rapids': 'MI',
+            'minneapolis': 'MN', 'st. paul': 'MN', 'saint paul': 'MN',
+            'charlotte': 'NC', 'raleigh': 'NC', 'durham': 'NC', 'advance': 'NC',
+            'nashville': 'TN', 'knoxville': 'TN', 'memphis': 'TN',
+            'baltimore': 'MD', 'bethesda': 'MD',
+            'washington': 'DC', 'dc': 'DC', 'd.c.': 'DC',
+            'cleveland': 'OH', 'columbus': 'OH', 'cincinnati': 'OH',
+            'kansas city': 'MO', 'st. louis': 'MO', 'saint louis': 'MO',
+            'indianapolis': 'IN', 'bloomington': 'IN',
+            'milwaukee': 'WI', 'madison': 'WI',
+            'des moines': 'IA',
+            'omaha': 'NE',
+            'hartford': 'CT', 'greenwich': 'CT', 'stamford': 'CT', 'new haven': 'CT',
+            'providence': 'RI',
+            'portland': 'OR',
+            'las vegas': 'NV',
+            'salt lake city': 'UT',
+            'new orleans': 'LA',
+            'birmingham': 'AL',
+            'louisville': 'KY',
+            'richmond': 'VA', 'mclean': 'VA', 'arlington': 'VA',
+            'charleston': 'SC', 'greenville': 'SC',
+            'greater chicago area': 'IL'
+        };
+
+        const STATE_NAMES = {
+            'alabama': 'AL', 'alaska': 'AK', 'arizona': 'AZ', 'arkansas': 'AR', 'california': 'CA',
+            'colorado': 'CO', 'connecticut': 'CT', 'delaware': 'DE', 'florida': 'FL', 'georgia': 'GA',
+            'hawaii': 'HI', 'idaho': 'ID', 'illinois': 'IL', 'indiana': 'IN', 'iowa': 'IA',
+            'kansas': 'KS', 'kentucky': 'KY', 'louisiana': 'LA', 'maine': 'ME', 'maryland': 'MD',
+            'massachusetts': 'MA', 'michigan': 'MI', 'minnesota': 'MN', 'mississippi': 'MS', 'missouri': 'MO',
+            'montana': 'MT', 'nebraska': 'NE', 'nevada': 'NV', 'new hampshire': 'NH', 'new jersey': 'NJ',
+            'new mexico': 'NM', 'new york': 'NY', 'north carolina': 'NC', 'north dakota': 'ND', 'ohio': 'OH',
+            'oklahoma': 'OK', 'oregon': 'OR', 'pennsylvania': 'PA', 'rhode island': 'RI', 'south carolina': 'SC',
+            'south dakota': 'SD', 'tennessee': 'TN', 'texas': 'TX', 'utah': 'UT', 'vermont': 'VT',
+            'virginia': 'VA', 'washington': 'WA', 'west virginia': 'WV', 'wisconsin': 'WI', 'wyoming': 'WY',
+            'district of columbia': 'DC'
+        };
+
+        const VALID_STATE_CODES = ['AL','AK','AZ','AR','CA','CO','CT','DE','FL','GA','HI','ID','IL','IN','IA','KS','KY','LA','ME','MD','MA','MI','MN','MS','MO','MT','NE','NV','NH','NJ','NM','NY','NC','ND','OH','OK','OR','PA','RI','SC','SD','TN','TX','UT','VT','VA','WA','WV','WI','WY','DC'];
+
+        function normalizeLocation(location) {
+            if (!location) return [];
+            
+            const states = new Set();
+            
+            // Handle multiple locations separated by / or ,
+            const parts = location.split(/[\/,]/).map(s => s.trim()).filter(s => s);
+            
+            for (let part of parts) {
+                const lower = part.toLowerCase().trim();
+                
+                // Check if it's already a valid 2-letter state code
+                const upper = part.toUpperCase().trim();
+                if (VALID_STATE_CODES.includes(upper)) {
+                    states.add(upper);
+                    continue;
+                }
+                
+                // Check if it's a full state name
+                if (STATE_NAMES[lower]) {
+                    states.add(STATE_NAMES[lower]);
+                    continue;
+                }
+                
+                // Check if it's a known city
+                if (CITY_TO_STATE[lower]) {
+                    states.add(CITY_TO_STATE[lower]);
+                    continue;
+                }
+                
+                // Try to parse "City, ST" or "City ST" format
+                const match = part.match(/,?\s*([A-Za-z]{2})$/);
+                if (match) {
+                    const code = match[1].toUpperCase();
+                    if (VALID_STATE_CODES.includes(code)) {
+                        states.add(code);
+                        continue;
+                    }
+                }
+                
+                // Try city match without state suffix
+                const cityPart = part.replace(/,?\s*[A-Za-z]{2}$/, '').trim().toLowerCase();
+                if (CITY_TO_STATE[cityPart]) {
+                    states.add(CITY_TO_STATE[cityPart]);
+                    continue;
+                }
+            }
+            
+            return [...states].sort();
+        }
+
+        function getStateDisplay(states) {
+            if (!states || states.length === 0) return 'Unknown';
+            return states.join(', ');
+        }
+
+        // ========== CSV PARSER ==========
+        function parseCSV(csvText) {
+            const lines = csvText.split('\n');
+            const result = [];
+            let currentRow = [];
+            let inQuotes = false;
+            let currentField = '';
+
+            for (let line of lines) {
+                if (!line.trim()) continue;
+
+                for (let i = 0; i < line.length; i++) {
+                    const char = line[i];
+                    const nextChar = line[i + 1];
+
+                    if (char === '"') {
+                        if (inQuotes && nextChar === '"') {
+                            currentField += '"';
+                            i++;
+                        } else {
+                            inQuotes = !inQuotes;
+                        }
+                    } else if (char === ',' && !inQuotes) {
+                        currentRow.push(currentField);
+                        currentField = '';
+                    } else {
+                        currentField += char;
+                    }
+                }
+
+                if (!inQuotes) {
+                    currentRow.push(currentField);
+                    result.push(currentRow);
+                    currentRow = [];
+                    currentField = '';
+                } else {
+                    currentField += '\n';
+                }
+            }
+
+            return result;
+        }
+
+        // ========== DATA FETCHING ==========
+        async function fetchSheetData(tabName) {
+            log(`Fetching ${tabName} data...`, 'info');
+            
+            // Get the GID for this tab
+            const tabConfig = SHEET_TABS[tabName];
+            if (!tabConfig) {
+                throw new Error(`Unknown tab: ${tabName}`);
+            }
+            
+            const gid = tabConfig.gid;
+            
+            // Try multiple URL formats
+            const urls = [
+                // Format 1: Direct export with GID (most reliable)
+                `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=${gid}`,
+                // Format 2: Published sheet
+                `https://docs.google.com/spreadsheets/d/e/${PUBLISHED_ID}/pub?gid=${gid}&single=true&output=csv`
+            ];
+            
+            for (let i = 0; i < urls.length; i++) {
+                try {
+                    log(`  Trying URL format ${i + 1} (GID ${gid})...`, 'info');
+                    
+                    const response = await fetch(urls[i], {
+                        method: 'GET',
+                        mode: 'cors'
+                    });
+                    
+                    if (!response.ok) {
+                        log(`  Format ${i + 1} failed: HTTP ${response.status}`, 'warning');
+                        continue;
+                    }
+                    
+                    const text = await response.text();
+                    
+                    // Check if we got actual data
+                    if (!text || text.length < 10) {
+                        log(`  Format ${i + 1} returned empty data`, 'warning');
+                        continue;
+                    }
+                    
+                    const rows = parseCSV(text);
+                    
+                    if (rows.length === 0) {
+                        log(`  Format ${i + 1} parsed 0 rows`, 'warning');
+                        continue;
+                    }
+                    
+                    log(`✓ Loaded ${rows.length - 1} rows from ${tabName}`, 'success');
+                    return rows;
+                    
+                } catch (error) {
+                    log(`  Format ${i + 1} error: ${error.message}`, 'warning');
+                    continue;
+                }
+            }
+            
+            // All methods failed
+            throw new Error(`Failed to fetch ${tabName} - all URL formats failed. The sheet may need additional permissions or the browser may be blocking requests.`);
+        }
+
+        // ========== PARSE CURRENCY ==========
+        function parseCurrency(value) {
+            if (!value) return 0;
+            const str = value.toString().replace(/[$,]/g, '');
+            const num = parseFloat(str);
+            return isNaN(num) ? 0 : num / 1000000; // Convert to millions
+        }
+
+        // ========== LOCATION NORMALIZATION ==========
+        function normalizeLocation(location) {
+            if (!location) return '';
+            
+            const loc = location.trim();
+            
+            // State name to abbreviation mapping
+            const stateNames = {
+                'alabama': 'AL', 'alaska': 'AK', 'arizona': 'AZ', 'arkansas': 'AR',
+                'california': 'CA', 'colorado': 'CO', 'connecticut': 'CT', 'delaware': 'DE',
+                'florida': 'FL', 'georgia': 'GA', 'hawaii': 'HI', 'idaho': 'ID',
+                'illinois': 'IL', 'indiana': 'IN', 'iowa': 'IA', 'kansas': 'KS',
+                'kentucky': 'KY', 'louisiana': 'LA', 'maine': 'ME', 'maryland': 'MD',
+                'massachusetts': 'MA', 'michigan': 'MI', 'minnesota': 'MN', 'mississippi': 'MS',
+                'missouri': 'MO', 'montana': 'MT', 'nebraska': 'NE', 'nevada': 'NV',
+                'new hampshire': 'NH', 'new jersey': 'NJ', 'new mexico': 'NM', 'new york': 'NY',
+                'north carolina': 'NC', 'north dakota': 'ND', 'ohio': 'OH', 'oklahoma': 'OK',
+                'oregon': 'OR', 'pennsylvania': 'PA', 'rhode island': 'RI', 'south carolina': 'SC',
+                'south dakota': 'SD', 'tennessee': 'TN', 'texas': 'TX', 'utah': 'UT',
+                'vermont': 'VT', 'virginia': 'VA', 'washington': 'WA', 'west virginia': 'WV',
+                'wisconsin': 'WI', 'wyoming': 'WY', 'district of columbia': 'DC'
+            };
+
+            // City to state mapping (common cities)
+            const cityToState = {
+                // Northeast
+                'nyc': 'NY', 'new york': 'NY', 'new york city': 'NY', 'manhattan': 'NY', 'brooklyn': 'NY',
+                'boston': 'MA', 'cambridge': 'MA',
+                'philadelphia': 'PA', 'philly': 'PA', 'pittsburgh': 'PA',
+                'hartford': 'CT', 'greenwich': 'CT', 'stamford': 'CT', 'new haven': 'CT', 'westport': 'CT',
+                'newark': 'NJ', 'jersey city': 'NJ', 'princeton': 'NJ',
+                'providence': 'RI',
+                'baltimore': 'MD', 'bethesda': 'MD',
+                'washington': 'DC', 'dc': 'DC',
+                'buffalo': 'NY', 'albany': 'NY', 'rochester': 'NY', 'white plains': 'NY',
+                'portland': 'ME',
+                
+                // Southeast
+                'atlanta': 'GA',
+                'miami': 'FL', 'tampa': 'FL', 'orlando': 'FL', 'jacksonville': 'FL', 
+                'ft. lauderdale': 'FL', 'fort lauderdale': 'FL', 'palm beach': 'FL', 'naples': 'FL', 'boca raton': 'FL',
+                'charlotte': 'NC', 'raleigh': 'NC', 'durham': 'NC', 'chapel hill': 'NC', 'advance': 'NC', 'winston-salem': 'NC',
+                'charleston': 'SC', 'greenville': 'SC',
+                'nashville': 'TN', 'memphis': 'TN', 'knoxville': 'TN', 'chattanooga': 'TN',
+                'birmingham': 'AL',
+                'new orleans': 'LA',
+                'richmond': 'VA', 'norfolk': 'VA', 'virginia beach': 'VA', 'arlington': 'VA', 'mclean': 'VA',
+                'louisville': 'KY', 'lexington': 'KY',
+                
+                // Midwest
+                'chicago': 'IL', 'highland park': 'IL', 'greater chicago area': 'IL', 'evanston': 'IL', 'lake forest': 'IL', 'winnetka': 'IL',
+                'detroit': 'MI', 'ann arbor': 'MI', 'grand rapids': 'MI', 'bloomfield hills': 'MI',
+                'cleveland': 'OH', 'columbus': 'OH', 'cincinnati': 'OH', 'dayton': 'OH', 'akron': 'OH',
+                'indianapolis': 'IN', 'bloomington': 'IN',
+                'milwaukee': 'WI', 'madison': 'WI',
+                'minneapolis': 'MN', 'st. paul': 'MN', 'saint paul': 'MN',
+                'des moines': 'IA', 'cedar rapids': 'IA',
+                'st. louis': 'MO', 'saint louis': 'MO', 'kansas city': 'MO',
+                'omaha': 'NE', 'lincoln': 'NE',
+                
+                // Texas
+                'houston': 'TX', 'dallas': 'TX', 'austin': 'TX', 'san antonio': 'TX', 'fort worth': 'TX',
+                
+                // West
+                'los angeles': 'CA', 'la': 'CA', 'san francisco': 'CA', 'sf': 'CA', 'san diego': 'CA',
+                'san jose': 'CA', 'sacramento': 'CA', 'oakland': 'CA', 'palo alto': 'CA', 'menlo park': 'CA',
+                'newport beach': 'CA', 'beverly hills': 'CA', 'pasadena': 'CA', 'irvine': 'CA',
+                'seattle': 'WA', 'bellevue': 'WA', 'tacoma': 'WA',
+                'portland': 'OR', 'eugene': 'OR',
+                'denver': 'CO', 'boulder': 'CO', 'colorado springs': 'CO', 'aspen': 'CO',
+                'phoenix': 'AZ', 'scottsdale': 'AZ', 'tucson': 'AZ', 'paradise valley': 'AZ',
+                'las vegas': 'NV', 'reno': 'NV',
+                'salt lake city': 'UT',
+                'honolulu': 'HI',
+                'anchorage': 'AK'
+            };
+
+            const locLower = loc.toLowerCase();
+            
+            // Check if it's already a 2-letter state code
+            if (/^[A-Z]{2}$/.test(loc)) {
+                return loc;
+            }
+            
+            // Check if it's just "MA" or similar at the end
+            const stateCodeMatch = loc.match(/,?\s*([A-Z]{2})$/);
+            if (stateCodeMatch) {
+                return stateCodeMatch[1];
+            }
+            
+            // Check state names
+            for (const [name, abbrev] of Object.entries(stateNames)) {
+                if (locLower === name || locLower.includes(name)) {
+                    return abbrev;
+                }
+            }
+            
+            // Check city mappings
+            for (const [city, state] of Object.entries(cityToState)) {
+                if (locLower === city || locLower.startsWith(city + ',') || locLower.startsWith(city + ' ')) {
+                    return state;
+                }
+            }
+            
+            // Handle "City, ST" or "City, State" format
+            const parts = loc.split(/[,\/]/);
+            for (const part of parts) {
+                const trimmed = part.trim();
+                const trimmedLower = trimmed.toLowerCase();
+                
+                // Check if this part is a state code
+                if (/^[A-Z]{2}$/.test(trimmed)) {
+                    return trimmed;
+                }
+                
+                // Check if this part is a state name
+                if (stateNames[trimmedLower]) {
+                    return stateNames[trimmedLower];
+                }
+                
+                // Check if this part is a known city
+                if (cityToState[trimmedLower]) {
+                    return cityToState[trimmedLower];
+                }
+            }
+            
+            // Return original if no match (for international, etc.)
+            return loc;
+        }
+
+        // State abbreviation to full name for display
+        const stateFullNames = {
+            'AL': 'Alabama', 'AK': 'Alaska', 'AZ': 'Arizona', 'AR': 'Arkansas',
+            'CA': 'California', 'CO': 'Colorado', 'CT': 'Connecticut', 'DE': 'Delaware',
+            'DC': 'Washington DC', 'FL': 'Florida', 'GA': 'Georgia', 'HI': 'Hawaii',
+            'ID': 'Idaho', 'IL': 'Illinois', 'IN': 'Indiana', 'IA': 'Iowa',
+            'KS': 'Kansas', 'KY': 'Kentucky', 'LA': 'Louisiana', 'ME': 'Maine',
+            'MD': 'Maryland', 'MA': 'Massachusetts', 'MI': 'Michigan', 'MN': 'Minnesota',
+            'MS': 'Mississippi', 'MO': 'Missouri', 'MT': 'Montana', 'NE': 'Nebraska',
+            'NV': 'Nevada', 'NH': 'New Hampshire', 'NJ': 'New Jersey', 'NM': 'New Mexico',
+            'NY': 'New York', 'NC': 'North Carolina', 'ND': 'North Dakota', 'OH': 'Ohio',
+            'OK': 'Oklahoma', 'OR': 'Oregon', 'PA': 'Pennsylvania', 'RI': 'Rhode Island',
+            'SC': 'South Carolina', 'SD': 'South Dakota', 'TN': 'Tennessee', 'TX': 'Texas',
+            'UT': 'Utah', 'VT': 'Vermont', 'VA': 'Virginia', 'WA': 'Washington',
+            'WV': 'West Virginia', 'WI': 'Wisconsin', 'WY': 'Wyoming'
+        };
+
+        // ========== DATA PROCESSING ==========
+        async function loadAllData() {
+            try {
+                log('🚀 Starting data load...', 'info');
+
+                // Fetch all sheets
+                const [firmsData, teamData, connectorsData, prospectsData] = await Promise.all([
+                    fetchSheetData('firms'),
+                    fetchSheetData('team'),
+                    fetchSheetData('mutualConnections'),
+                    fetchSheetData('prospects')
+                ]);
+
+                log('📊 Processing firms data...', 'info');
+                processFirmsData(firmsData);
+                
+                log('👥 Processing team data...', 'info');
+                processTeamData(teamData);
+                
+                log('🤝 Processing connectors data...', 'info');
+                processConnectorsData(connectorsData);
+                
+                log('🎯 Processing prospects data...', 'info');
+                processProspectsData(prospectsData);
+                
+                log('🔗 Building relationships...', 'info');
+                buildRelationships();
+                
+                log('✅ Data load complete!', 'success');
+                log(`📈 Stats: ${toolData.firms.length} firms, ${toolData.prospects.length} prospects, ${toolData.teamMembers.length} team members, ${toolData.mutualConnections.length} connectors, ${toolData.relationships.length} relationships`, 'info');
+
+                return true;
+            } catch (error) {
+                log(`❌ Fatal error: ${error.message}`, 'error');
+                throw error;
+            }
+        }
+
+        function processFirmsData(rows) {
+            const headers = rows[0];
+            const firmsByName = {};
+
+            // Actual column structure from Google Sheet:
+            // 0: Firm Name, 1: Type, 2: Location, 3: Description, 4: AUM, 
+            // 5: Website, 6: LinkedIn, 7: Status, 8: Priority, 9: Notes,
+            // 10: # Prospects, 11: Has Warm Intro, 12+: Prospect 1-55
+
+            for (let i = 1; i < rows.length; i++) {
+                const row = rows[i];
+                if (!row[0]) continue;
+
+                const rawLocation = row[2] || '';
+                
+                // Validate status - sometimes LinkedIn URL ends up in wrong column
+                let status = row[7] || 'target_prospect';
+                if (status.toLowerCase().includes('linkedin.com') || status.toLowerCase().includes('http')) {
+                    status = 'target_prospect'; // Default if URL is in status field
+                }
+                
+                const firm = {
+                    id: `firm_${i}`,
+                    name: row[0] || '',
+                    type: row[1] || 'SFO',
+                    location: rawLocation,
+                    normalizedState: normalizeLocation(rawLocation),
+                    description: row[3] || '',
+                    aum: parseCurrency(row[4]),
+                    website: row[5] || '',
+                    linkedin: row[6] || '',
+                    status: status,
+                    priority: parseInt(row[8]) || 0,
+                    notes: row[9] || '',
+                    prospectCount: parseInt(row[10]) || 0,
+                    hasWarmIntro: row[11] === 'Yes' || row[11] === 'TRUE' || row[11] === 'true',
+                    prospectNames: [], // Store prospect names from columns 12+
+                    tags: [],
+                    dateAdded: new Date().toISOString().split('T')[0],
+                    lastUpdated: new Date().toISOString()
+                };
+
+                // Parse prospect names from columns 12+
+                for (let j = 12; j < row.length; j++) {
+                    if (row[j] && row[j].trim()) {
+                        firm.prospectNames.push(row[j].trim());
+                    }
+                }
+
+                toolData.firms.push(firm);
+                firmsByName[normalizeName(firm.name)] = firm;
+            }
+
+            window.firmsByName = firmsByName;
+            
+            // Log location normalization stats
+            const allStates = toolData.firms.flatMap(f => f.normalizedState || []);
+            const uniqueStates = [...new Set(allStates)];
+            const firmsWithStates = toolData.firms.filter(f => f.normalizedState && f.normalizedState.length > 0).length;
+            const firmsWithoutStates = toolData.firms.filter(f => !f.normalizedState || f.normalizedState.length === 0).length;
+            
+            log(`Processed ${toolData.firms.length} firms`, 'success');
+            log(`  - Normalized to ${uniqueStates.length} unique states: ${uniqueStates.slice(0, 10).join(', ')}${uniqueStates.length > 10 ? '...' : ''}`, 'info');
+            if (firmsWithoutStates > 0) {
+                log(`  - ${firmsWithoutStates} firms have unrecognized locations`, 'warning');
+            }
+        }
+
+        function processTeamData(rows) {
+            const headers = rows[0];
+
+            for (let i = 1; i < rows.length; i++) {
+                const row = rows[i];
+                if (!row[0]) continue;
+
+                const member = {
+                    id: `team_${i}`,
+                    name: row[0] || '',
+                    role: row[1] || '',
+                    email: row[2] || '',
+                    phone: row[3] || '',
+                    linkedin: row[4] || '',
+                    active: row[5] !== 'false',
+                    location: row[6] || '',
+                    specialties: row[7] || ''
+                };
+
+                toolData.teamMembers.push(member);
+            }
+
+            log(`Processed ${toolData.teamMembers.length} team members`, 'success');
+        }
+
+        function processConnectorsData(rows) {
+            const headers = rows[0];
+
+            // DEBUG: Log the actual headers to see column structure
+            log(`Mutual Connections headers (first 15): ${headers.slice(0, 15).map((h, i) => `[${i}]="${h}"`).join(', ')}`, 'info');
+
+            // Actual column structure from Google Sheet:
+            // 0: Mutual Connection Name, 1: Title, 2: Firm, 3: Email, 4: Phone,
+            // 5: LinkedIn URL, 6: Location, 7: Mutual Count,
+            // 8-11: Team member names as headers (Ted Clark, Jon Terbell, Chris Gilman, TJ Agnihotri)
+            //       with Yes/No values in the cells
+            // 12+: Prospect names as headers with Yes/No values
+
+            // Extract team member names from headers (columns 8-11)
+            const teamMemberColumns = [];
+            for (let j = 8; j < Math.min(headers.length, 12); j++) {
+                if (headers[j] && headers[j].trim()) {
+                    teamMemberColumns.push({
+                        index: j,
+                        name: headers[j].trim()
+                    });
+                }
+            }
+            log(`Found ${teamMemberColumns.length} team member columns: ${teamMemberColumns.map(t => `[${t.index}]${t.name}`).join(', ')}`, 'info');
+
+            // Extract prospect names from headers (columns 12+)
+            const prospectColumns = [];
+            for (let j = 12; j < headers.length; j++) {
+                if (headers[j] && headers[j].trim()) {
+                    // Header might be "Prospect 1: Can Intro?" or just the prospect name
+                    let prospectName = headers[j].trim();
+                    // Clean up header if it has ": Can Intro?" suffix
+                    prospectName = prospectName.replace(/:\s*Can Intro\??/i, '').trim();
+                    prospectColumns.push({
+                        index: j,
+                        name: prospectName
+                    });
+                }
+            }
+            log(`Found ${prospectColumns.length} prospect columns in Mutual Connections headers`, 'info');
+
+            // DEBUG: Show first data row values at team member columns
+            if (rows.length > 1) {
+                const firstRow = rows[1];
+                log(`First data row team values: ${teamMemberColumns.map(col => `[${col.index}]="${firstRow[col.index]}"`).join(', ')}`, 'info');
+                log(`First data row has ${firstRow.length} total columns`, 'info');
+            }
+
+            for (let i = 1; i < rows.length; i++) {
+                const row = rows[i];
+                if (!row[0]) continue;
+
+                const connector = {
+                    id: `connector_${i}`,
+                    name: row[0] || '',
+                    title: row[1] || '',
+                    company: row[2] || '',
+                    email: row[3] || '',
+                    phone: row[4] || '',
+                    linkedin: row[5] || '',
+                    location: row[6] || '',
+                    mutualCount: parseInt(row[7]) || 0,
+                    teamConnections: [], // Which team members know this person (actual names)
+                    prospects: [] // Which prospects this person knows (actual names)
+                };
+
+                // Parse team connections - check for ANY non-empty value in team columns
+                teamMemberColumns.forEach(col => {
+                    const rawVal = row[col.index];
+                    const val = (rawVal || '').toString().trim();
+                    const valLower = val.toLowerCase();
+                    const headerLower = col.name.toLowerCase();
+                    
+                    // DEBUG: Log first 5 rows to see exact values
+                    if (i <= 5) {
+                        log(`  Row ${i}, Col ${col.index} (${col.name}): raw="${rawVal}", trimmed="${val}"`, 'info');
+                    }
+                    
+                    // Match if: "Yes", "TRUE", "1", "X", "✓" OR if value contains team member name OR any non-empty value
+                    if (val && val.length > 0) {
+                        if (valLower === 'yes' || valLower === 'true' || valLower === 'x' || valLower === '✓' || valLower === '1' ||
+                            valLower === headerLower || val === col.name ||
+                            valLower.includes(headerLower) || headerLower.includes(valLower)) {
+                            // Store the actual team member name from the header
+                            connector.teamConnections.push(col.name);
+                        }
+                    }
+                });
+
+                // Parse prospects - the cell VALUE is the prospect's name (not Yes/No)
+                // Headers are like "Prospect 1: Can Intro?" but cells contain actual names like "Jordan Lichtenberg"
+                prospectColumns.forEach(col => {
+                    const val = (row[col.index] || '').toString().trim();
+                    if (val && val.toLowerCase() !== 'no' && val.toLowerCase() !== 'false' && val !== '0' && val !== '') {
+                        // The cell value IS the prospect name
+                        connector.prospects.push(val);
+                    }
+                });
+
+                // DEBUG: Log first few rows to see what values are in team columns
+                if (i <= 3) {
+                    const teamVals = teamMemberColumns.map(col => `[${col.index}]="${row[col.index]}"`).join(', ');
+                    log(`Row ${i} "${connector.name}" team columns: ${teamVals}`, 'info');
+                    log(`  → teamConnections: [${connector.teamConnections.join(', ')}]`, 'info');
+                }
+
+                toolData.mutualConnections.push(connector);
+            }
+
+            // Store for debugging
+            window.connectorHeaders = headers;
+            window.teamMemberColumns = teamMemberColumns;
+            window.prospectColumns = prospectColumns;
+
+            // Log sample for debugging
+            if (toolData.mutualConnections.length > 0) {
+                const sample = toolData.mutualConnections[0];
+                log(`Sample connector "${sample.name}": knows ${sample.teamConnections.length} team members, can intro to ${sample.prospects.length} prospects`, 'info');
+            }
+
+            log(`Processed ${toolData.mutualConnections.length} connectors`, 'success');
+        }
+
+        function processProspectsData(rows) {
+            const headers = rows[0];
+
+            for (let i = 1; i < rows.length; i++) {
+                const row = rows[i];
+                if (!row[0]) continue;
+
+                const prospect = {
+                    id: `prospect_${i}`,
+                    name: row[0] || '',
+                    title: row[1] || '',
+                    firmName: row[2] || '',
+                    firmId: null,
+                    email: row[3] || '',
+                    phone: row[4] || '',
+                    linkedin: row[5] || '',
+                    mutualConnections: [],
+                    role: '',
+                    notes: '',
+                    primaryContact: false
+                };
+
+                // Link to firm
+                const firmName = normalizeName(prospect.firmName);
+                const firm = window.firmsByName[firmName];
+                if (firm) {
+                    prospect.firmId = firm.id;
+                } else if (prospect.firmName) {
+                    log(`⚠ Prospect "${prospect.name}" lists firm "${prospect.firmName}" which wasn't found`, 'warning');
+                }
+
+                // Parse mutual connections from remaining columns
+                for (let j = 6; j < row.length; j++) {
+                    if (row[j] && row[j].trim()) {
+                        prospect.mutualConnections.push(row[j].trim());
+                    }
+                }
+
+                toolData.prospects.push(prospect);
+            }
+
+            log(`Processed ${toolData.prospects.length} prospects`, 'success');
+        }
+
+        function buildRelationships() {
+            const relationships = [];
+            const prospectsByName = {};
+            const connectorsByName = {};
+            const teamByName = {};
+
+            // Build lookup dictionaries
+            toolData.prospects.forEach(p => {
+                prospectsByName[normalizeName(p.name)] = p;
+            });
+            toolData.mutualConnections.forEach(c => {
+                connectorsByName[normalizeName(c.name)] = c;
+            });
+            toolData.teamMembers.forEach(t => {
+                teamByName[normalizeName(t.name)] = t;
+            });
+
+            log(`Lookup tables: ${Object.keys(prospectsByName).length} prospects, ${Object.keys(connectorsByName).length} connectors, ${Object.keys(teamByName).length} team members`, 'info');
+
+            let matched = 0;
+            let unmatchedConnectors = 0;
+            let unmatchedTeam = 0;
+            let unmatchedProspects = 0;
+
+            // Build relationships from prospects (using their mutual connections list)
+            toolData.prospects.forEach(prospect => {
+                prospect.mutualConnections.forEach(connectorName => {
+                    const normalizedConnector = normalizeName(connectorName);
+                    const connector = connectorsByName[normalizedConnector];
+
+                    if (connector) {
+                        // Find which team members know this connector
+                        connector.teamConnections.forEach(teamName => {
+                            const normalizedTeam = normalizeName(teamName);
+                            const teamMember = teamByName[normalizedTeam];
+
+                            if (teamMember) {
+                                const exists = relationships.some(r =>
+                                    r.teamMemberId === teamMember.id &&
+                                    r.connectorId === connector.id &&
+                                    r.prospectId === prospect.id
+                                );
+                                if (!exists) {
+                                    relationships.push({
+                                        teamMemberId: teamMember.id,
+                                        connectorId: connector.id,
+                                        prospectId: prospect.id,
+                                        firmId: prospect.firmId,
+                                        strength: 'strong'
+                                    });
+                                    matched++;
+                                }
+                            } else {
+                                unmatchedTeam++;
+                            }
+                        });
+                    } else {
+                        unmatchedConnectors++;
+                    }
+                });
+            });
+
+            // Also process from connector side (the prospect columns with Yes/No)
+            toolData.mutualConnections.forEach(connector => {
+                connector.prospects.forEach(prospectName => {
+                    const normalizedProspect = normalizeName(prospectName);
+                    const prospect = prospectsByName[normalizedProspect];
+
+                    if (prospect) {
+                        connector.teamConnections.forEach(teamName => {
+                            const normalizedTeam = normalizeName(teamName);
+                            const teamMember = teamByName[normalizedTeam];
+
+                            if (teamMember) {
+                                // Check if this relationship already exists
+                                const exists = relationships.some(r =>
+                                    r.teamMemberId === teamMember.id &&
+                                    r.connectorId === connector.id &&
+                                    r.prospectId === prospect.id
+                                );
+
+                                if (!exists) {
+                                    relationships.push({
+                                        teamMemberId: teamMember.id,
+                                        connectorId: connector.id,
+                                        prospectId: prospect.id,
+                                        firmId: prospect.firmId,
+                                        strength: 'strong'
+                                    });
+                                    matched++;
+                                }
+                            }
+                        });
+                    } else {
+                        unmatchedProspects++;
+                    }
+                });
+            });
+
+            toolData.relationships = relationships;
+            log(`Built ${relationships.length} relationship paths`, 'success');
+            log(`  - Matched: ${matched}`, 'info');
+            if (unmatchedConnectors > 0) log(`  - Unmatched connector refs: ${unmatchedConnectors}`, 'warning');
+            if (unmatchedTeam > 0) log(`  - Unmatched team refs: ${unmatchedTeam}`, 'warning');
+            if (unmatchedProspects > 0) log(`  - Unmatched prospect refs: ${unmatchedProspects}`, 'warning');
+            
+            // Debug: Sample some data
+            if (toolData.prospects.length > 0) {
+                const sampleProspect = toolData.prospects[0];
+                log(`  - Sample prospect "${sampleProspect.name}" has ${sampleProspect.mutualConnections.length} mutual connections`, 'info');
+            }
+            if (toolData.mutualConnections.length > 0) {
+                const sampleConnector = toolData.mutualConnections[0];
+                log(`  - Sample connector "${sampleConnector.name}" knows: [${sampleConnector.teamConnections.join(', ')}]`, 'info');
+            }
+        }
+
+        // ========== UI INITIALIZATION ==========
+        async function initializeApp() {
+            try {
+                await loadAllData();
+                
+                // Hide loading overlay
+                setTimeout(() => {
+                    document.getElementById('loading-overlay').style.display = 'none';
+                    
+                    // Initialize all views
+                    initializeViews();
+                    renderAllViews();
+                }, 1000);
+            } catch (error) {
+                log(`💥 Application failed to load: ${error.message}`, 'error');
+                
+                // Show helpful error message
+                const errorDiv = document.createElement('div');
+                errorDiv.style.cssText = `
+                    position: fixed;
+                    top: 50%;
+                    left: 50%;
+                    transform: translate(-50%, -50%);
+                    background: white;
+                    padding: 30px;
+                    border-radius: 12px;
+                    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+                    max-width: 600px;
+                    z-index: 10000;
+                `;
+                errorDiv.innerHTML = `
+                    <h2 style="color: #ff6b6b; margin-bottom: 15px;">❌ Unable to Load Data</h2>
+                    <p style="margin-bottom: 15px;">The tool couldn't fetch data from your Google Sheet. This usually means the sheet needs to be published.</p>
+                    <h3 style="color: #004D4D; margin-top: 20px; margin-bottom: 10px;">📋 How to Fix:</h3>
+                    <ol style="line-height: 1.8; color: #2d3748;">
+                        <li>Open your Google Sheet</li>
+                        <li>Click <strong>File</strong> → <strong>Share</strong> → <strong>Publish to web</strong></li>
+                        <li>Select <strong>Entire Document</strong></li>
+                        <li>Click <strong>Publish</strong></li>
+                        <li>Click <strong>OK</strong> on the confirmation</li>
+                        <li>Refresh this page</li>
+                    </ol>
+                    <p style="margin-top: 20px; padding: 15px; background: #e7f3ff; border-radius: 8px; font-size: 14px;">
+                        💡 <strong>Note:</strong> "Anyone with link can view" is different from "Publish to web". You need to publish it.
+                    </p>
+                    <button onclick="location.reload()" style="
+                        margin-top: 20px;
+                        padding: 12px 24px;
+                        background: #5FC4B8;
+                        color: white;
+                        border: none;
+                        border-radius: 6px;
+                        font-size: 16px;
+                        font-weight: 600;
+                        cursor: pointer;
+                    ">Retry After Publishing</button>
+                `;
+                document.body.appendChild(errorDiv);
+            }
+        }
+
+        function initializeViews() {
+            // Populate organization type filters dynamically from data
+            const types = [...new Set(toolData.firms.map(f => f.type).filter(t => t))].sort();
+            
+            ['prospects-type', 'firms-type'].forEach(id => {
+                const select = document.getElementById(id);
+                types.forEach(type => {
+                    const option = document.createElement('option');
+                    option.value = type;
+                    option.textContent = type;
+                    select.appendChild(option);
+                });
+            });
+
+            // Populate location filters with normalized states
+            // Flatten the arrays since normalizedState is an array per firm
+            const allStates = toolData.firms.flatMap(f => f.normalizedState || []);
+            const uniqueStates = [...new Set(allStates)].sort();
+            
+            // State code to full name mapping for display
+            const stateFullNames = {
+                'AL': 'Alabama', 'AK': 'Alaska', 'AZ': 'Arizona', 'AR': 'Arkansas', 'CA': 'California',
+                'CO': 'Colorado', 'CT': 'Connecticut', 'DE': 'Delaware', 'FL': 'Florida', 'GA': 'Georgia',
+                'HI': 'Hawaii', 'ID': 'Idaho', 'IL': 'Illinois', 'IN': 'Indiana', 'IA': 'Iowa',
+                'KS': 'Kansas', 'KY': 'Kentucky', 'LA': 'Louisiana', 'ME': 'Maine', 'MD': 'Maryland',
+                'MA': 'Massachusetts', 'MI': 'Michigan', 'MN': 'Minnesota', 'MS': 'Mississippi', 'MO': 'Missouri',
+                'MT': 'Montana', 'NE': 'Nebraska', 'NV': 'Nevada', 'NH': 'New Hampshire', 'NJ': 'New Jersey',
+                'NM': 'New Mexico', 'NY': 'New York', 'NC': 'North Carolina', 'ND': 'North Dakota', 'OH': 'Ohio',
+                'OK': 'Oklahoma', 'OR': 'Oregon', 'PA': 'Pennsylvania', 'RI': 'Rhode Island', 'SC': 'South Carolina',
+                'SD': 'South Dakota', 'TN': 'Tennessee', 'TX': 'Texas', 'UT': 'Utah', 'VT': 'Vermont',
+                'VA': 'Virginia', 'WA': 'Washington', 'WV': 'West Virginia', 'WI': 'Wisconsin', 'WY': 'Wyoming',
+                'DC': 'Washington DC'
+            };
+            
+            ['prospects-location', 'firms-location'].forEach(id => {
+                const select = document.getElementById(id);
+                uniqueStates.forEach(state => {
+                    const option = document.createElement('option');
+                    option.value = state;
+                    option.textContent = stateFullNames[state] || state;
+                    select.appendChild(option);
+                });
+            });
+
+            // Populate team member filter for connections view
+            const connectionsTeamSelect = document.getElementById('connections-team-filter');
+            if (connectionsTeamSelect) {
+                toolData.teamMembers.forEach(tm => {
+                    const option = document.createElement('option');
+                    option.value = tm.name;
+                    option.textContent = tm.name;
+                    connectionsTeamSelect.appendChild(option);
+                });
+            }
+
+            // Attach filter event listeners
+            document.getElementById('prospects-search').addEventListener('input', renderProspectsView);
+            document.getElementById('prospects-type').addEventListener('change', renderProspectsView);
+            document.getElementById('prospects-location').addEventListener('change', renderProspectsView);
+            document.getElementById('prospects-connection').addEventListener('change', renderProspectsView);
+
+            document.getElementById('connections-search').addEventListener('input', renderConnectionsView);
+            document.getElementById('connections-team-filter').addEventListener('change', renderConnectionsView);
+            document.getElementById('connections-sort').addEventListener('change', renderConnectionsView);
+            document.getElementById('connections-display').addEventListener('change', renderConnectionsView);
+
+            document.getElementById('firms-search').addEventListener('input', renderFirmsView);
+            document.getElementById('firms-type').addEventListener('change', renderFirmsView);
+            document.getElementById('firms-location').addEventListener('change', renderFirmsView);
+            document.getElementById('firms-status').addEventListener('change', renderFirmsView);
+
+            document.getElementById('team-search').addEventListener('input', renderTeamView);
+            document.getElementById('team-sort').addEventListener('change', renderTeamView);
+        }
+
+        function renderAllViews() {
+            renderProspectsView();
+            renderConnectionsView();
+            renderFirmsView();
+            renderTeamView();
+            updateFooter();
+        }
+
+        // ========== VIEW SWITCHING ==========
+        let currentView = 'prospects';
+
+        function switchView(viewName) {
+            currentView = viewName;
+            
+            // Update tab buttons
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            event.target.classList.add('active');
+
+            // Show selected view
+            document.querySelectorAll('.view').forEach(view => {
+                view.classList.remove('active');
+            });
+            document.getElementById(`${viewName}-view`).classList.add('active');
+        }
+
+        // ========== PROSPECTS VIEW ==========
+        let prospectsViewMode = 'firms';
+
+        function setProspectsViewMode(mode) {
+            prospectsViewMode = mode;
+            
+            document.getElementById('view-people-btn').classList.toggle('active', mode === 'people');
+            document.getElementById('view-firms-btn').classList.toggle('active', mode === 'firms');
+            
+            document.getElementById('prospects-people-table-container').style.display = mode === 'people' ? 'block' : 'none';
+            document.getElementById('prospects-firms-table').style.display = mode === 'firms' ? 'block' : 'none';
+            
+            renderProspectsView();
+        }
+
+        function renderProspectsView() {
+            const search = document.getElementById('prospects-search').value.toLowerCase();
+            const typeFilter = document.getElementById('prospects-type').value;
+            const locationFilter = document.getElementById('prospects-location').value;
+            const connectionFilter = document.getElementById('prospects-connection').value;
+
+            if (prospectsViewMode === 'firms') {
+                renderProspectsFirmsView(search, typeFilter, locationFilter, connectionFilter);
+            } else {
+                renderProspectsPeopleView(search, typeFilter, locationFilter, connectionFilter);
+            }
+        }
+
+        function renderProspectsFirmsView(search, typeFilter, locationFilter, connectionFilter) {
+            let filtered = toolData.firms.filter(firm => {
+                const matchesSearch = !search || 
+                    firm.name.toLowerCase().includes(search) ||
+                    firm.location.toLowerCase().includes(search);
+                
+                const matchesType = !typeFilter || firm.type === typeFilter;
+                
+                // normalizedState is an array, check if selected state is in it
+                const matchesLocation = !locationFilter || (firm.normalizedState && firm.normalizedState.includes(locationFilter));
+                
+                const hasConnections = toolData.relationships.some(r => r.firmId === firm.id);
+                const matchesConnection = !connectionFilter || 
+                    (connectionFilter === 'yes' && hasConnections) ||
+                    (connectionFilter === 'no' && !hasConnections);
+
+                return matchesSearch && matchesType && matchesLocation && matchesConnection;
+            });
+
+            const tbody = document.getElementById('prospects-table-body');
+            tbody.innerHTML = '';
+
+            filtered.forEach(firm => {
+                const row = tbody.insertRow();
+                row.className = 'clickable-row';
+                row.onclick = () => showFirmDetail(firm);
+
+                const contactCount = toolData.prospects.filter(p => p.firmId === firm.id).length;
+                const pathCount = toolData.relationships.filter(r => r.firmId === firm.id).length;
+
+                const typeClass = firm.type.toLowerCase().replace(/[^a-z]/g, '-');
+                const statusClass = firm.status.toLowerCase().replace(/[^a-z]/g, '-');
+
+                row.innerHTML = `
+                    <td><strong>${firm.name}</strong></td>
+                    <td><span class="badge badge-${typeClass}">${firm.type}</span></td>
+                    <td>${firm.location}</td>
+                    <td>${formatAUM(firm.aum)}</td>
+                    <td>${contactCount}</td>
+                    <td>${getWarmPathBadge(pathCount)}</td>
+                    <td>${firm.priority || '—'}</td>
+                `;
+            });
+
+            // Update stats
+            const firmsWithPaths = filtered.filter(f => 
+                toolData.relationships.some(r => r.firmId === f.id)
+            ).length;
+            const totalContacts = toolData.prospects.filter(p => 
+                filtered.some(f => f.id === p.firmId)
+            ).length;
+            const avgContacts = filtered.length > 0 ? (totalContacts / filtered.length).toFixed(1) : 0;
+            
+            document.getElementById('prospects-stats').innerHTML = `
+                <div class="stat">
+                    <span class="stat-value">${toolData.firms.length}</span>
+                    <span class="stat-label">Total Firms</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-value">${filtered.length}</span>
+                    <span class="stat-label">Filtered</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-value">${firmsWithPaths}</span>
+                    <span class="stat-label">With Warm Paths</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-value">${avgContacts}</span>
+                    <span class="stat-label">Contacts/Firm</span>
+                </div>
+            `;
+        }
+
+        function renderProspectsPeopleView(search, typeFilter, locationFilter, connectionFilter) {
+            let filtered = toolData.prospects.map(p => {
+                const firm = toolData.firms.find(f => f.id === p.firmId);
+                return { ...p, firm };
+            }).filter(p => {
+                if (!p.firm) return false;
+
+                const matchesSearch = !search || 
+                    p.name.toLowerCase().includes(search) ||
+                    p.title.toLowerCase().includes(search) ||
+                    p.firmName.toLowerCase().includes(search);
+                
+                const matchesType = !typeFilter || p.firm.type === typeFilter;
+                
+                const matchesLocation = !locationFilter || (p.firm.normalizedState && p.firm.normalizedState.includes(locationFilter));
+                
+                const hasConnections = toolData.relationships.some(r => r.prospectId === p.id);
+                const matchesConnection = !connectionFilter || 
+                    (connectionFilter === 'yes' && hasConnections) ||
+                    (connectionFilter === 'no' && !hasConnections);
+
+                return matchesSearch && matchesType && matchesLocation && matchesConnection;
+            });
+
+            const tbody = document.getElementById('prospects-people-table-body');
+            tbody.innerHTML = '';
+
+            filtered.forEach(prospect => {
+                const row = tbody.insertRow();
+                row.className = 'clickable-row';
+                row.onclick = () => showProspectDetail(prospect);
+
+                const pathCount = toolData.relationships.filter(r => r.prospectId === prospect.id).length;
+                const typeClass = prospect.firm.type.toLowerCase().replace(/[^a-z]/g, '-');
+                const statusClass = prospect.firm.status.toLowerCase().replace(/[^a-z]/g, '-');
+
+                row.innerHTML = `
+                    <td><strong>${prospect.name}</strong></td>
+                    <td>${prospect.title}</td>
+                    <td>${prospect.firmName}</td>
+                    <td><span class="badge badge-${typeClass}">${prospect.firm.type}</span></td>
+                    <td>${prospect.firm.location}</td>
+                    <td><span class="badge badge-${statusClass}">${prospect.firm.status.replace(/_/g, ' ')}</span></td>
+                    <td>${getWarmPathBadge(pathCount)}</td>
+                `;
+            });
+
+            // Update stats
+            const withPaths = toolData.prospects.filter(p => 
+                toolData.relationships.some(r => r.prospectId === p.id)
+            ).length;
+            const activeConnectors = new Set(toolData.relationships.map(r => r.connectorId)).size;
+            
+            document.getElementById('prospects-stats').innerHTML = `
+                <div class="stat">
+                    <span class="stat-value">${toolData.prospects.length}</span>
+                    <span class="stat-label">Prospects</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-value">${filtered.length}</span>
+                    <span class="stat-label">Filtered</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-value">${withPaths}</span>
+                    <span class="stat-label">With Paths</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-value">${activeConnectors}</span>
+                    <span class="stat-label">Connectors</span>
+                </div>
+            `;
+        }
+
+        // ========== CONNECTIONS VIEW ==========
+        function renderConnectionsView() {
+            const search = document.getElementById('connections-search').value.toLowerCase();
+            const teamFilter = document.getElementById('connections-team-filter').value;
+            const sortBy = document.getElementById('connections-sort').value;
+            const displayMode = document.getElementById('connections-display').value;
+
+            let filtered = toolData.mutualConnections.filter(c => {
+                const matchesSearch = !search || 
+                    c.name.toLowerCase().includes(search) ||
+                    c.company.toLowerCase().includes(search) ||
+                    c.title.toLowerCase().includes(search);
+                
+                // Filter by team member
+                const matchesTeam = !teamFilter || (c.teamConnections && c.teamConnections.includes(teamFilter));
+                
+                return matchesSearch && matchesTeam;
+            });
+
+            // Sort
+            filtered.sort((a, b) => {
+                const aReach = toolData.relationships.filter(r => r.connectorId === a.id).length;
+                const bReach = toolData.relationships.filter(r => r.connectorId === b.id).length;
+
+                if (sortBy === 'most') return bReach - aReach;
+                if (sortBy === 'fewest') return aReach - bReach;
+                if (sortBy === 'alpha') return a.name.localeCompare(b.name);
+                if (sortBy === 'alpha-desc') return b.name.localeCompare(a.name);
+                return 0;
+            });
+
+            const display = document.getElementById('connectors-display');
+            display.innerHTML = '';
+
+            if (displayMode === 'list') {
+                // Simple List View - Collapsible
+                filtered.forEach((connector, idx) => {
+                    const reach = toolData.relationships.filter(r => r.connectorId === connector.id);
+                    
+                    const listItem = document.createElement('div');
+                    listItem.className = 'connector-list-item';
+                    listItem.id = `connector-list-${idx}`;
+                    
+                    const prospectsHtml = reach.map(r => {
+                        const prospect = toolData.prospects.find(p => p.id === r.prospectId);
+                        const firm = toolData.firms.find(f => f.id === r.firmId);
+                        if (!prospect || !firm) return '';
+                        
+                        return `
+                            <div class="connector-prospect-item" onclick="event.stopPropagation(); showFirmDetail(toolData.firms.find(f => f.id === '${firm.id}'))">
+                                <div>
+                                    <span class="connector-prospect-firm">${firm.name}</span>
+                                    <span class="connector-prospect-name">- ${prospect.name}</span>
+                                </div>
+                                <div class="connector-prospect-meta">
+                                    <span class="badge badge-${firm.type.toLowerCase().replace(/[^a-z]/g, '-')}">${firm.type}</span>
+                                    <span style="color: #6c757d;">${formatAUM(firm.aum)}</span>
+                                </div>
+                            </div>
+                        `;
+                    }).join('');
+                    
+                    // Check if known by multiple team members
+                    const teamCount = connector.teamConnections?.length || 0;
+                    const overlapBadge = teamCount > 1 ? `<span class="overlap-badge">${teamCount} team</span>` : '';
+                    
+                    listItem.innerHTML = `
+                        <div class="connector-list-header" onclick="toggleConnectorList(${idx})">
+                            <div>
+                                <div class="connector-list-name">
+                                    ${connector.name}
+                                    <span class="badge" style="background: #5FC4B8; color: white;">${reach.length} path${reach.length !== 1 ? 's' : ''}</span>
+                                    ${overlapBadge}
+                                </div>
+                                <div class="connector-list-role">${connector.title}${connector.company ? `, ${connector.company}` : ''}</div>
+                                <div style="font-size: 12px; color: #5FC4B8; margin-top: 4px;">via ${connector.teamConnections?.join(', ') || 'Unknown'}</div>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 10px;">
+                                <button class="btn-info" onclick="event.stopPropagation(); showConnectorInfo('${connector.id}')">Info</button>
+                                <span class="connector-list-expand">▼</span>
+                            </div>
+                        </div>
+                        <div class="connector-list-prospects">
+                            ${prospectsHtml}
+                        </div>
+                    `;
+                    
+                    display.appendChild(listItem);
+                });
+            } else {
+                // Detailed Card View
+                filtered.forEach(connector => {
+                    const reach = toolData.relationships.filter(r => r.connectorId === connector.id);
+                    const uniqueFirms = new Set(reach.map(r => r.firmId));
+                    const uniqueProspects = new Set(reach.map(r => r.prospectId));
+
+                    const card = document.createElement('div');
+                    card.className = 'profile-card';
+                    card.innerHTML = `
+                        <div class="profile-card-header">
+                            <div class="profile-info">
+                                <div class="profile-name">
+                                    ${connector.name}
+                                    <span class="badge" style="background: #5FC4B8; color: white;">${reach.length} paths</span>
+                                </div>
+                                <div class="profile-role">${connector.title}${connector.company ? `, ${connector.company}` : ''}</div>
+                            </div>
+                            <div class="expand-icon">▼</div>
+                        </div>
+                        <div class="profile-body">
+                            <div class="detail-section">
+                                <h3>Reach</h3>
+                                <p>Can connect to ${uniqueProspects.size} prospects at ${uniqueFirms.size} firms</p>
+                            </div>
+                            <div class="detail-section">
+                                <h3>Known By</h3>
+                                <p>${connector.teamConnections.join(', ') || 'No team connections listed'}</p>
+                            </div>
+                            <div class="detail-section">
+                                <h3>Can Reach</h3>
+                                ${reach.slice(0, 10).map(r => {
+                                    const prospect = toolData.prospects.find(p => p.id === r.prospectId);
+                                    const firm = toolData.firms.find(f => f.id === r.firmId);
+                                    return `<div style="margin: 8px 0;">• ${prospect?.name || 'Unknown'} at ${firm?.name || 'Unknown firm'}</div>`;
+                                }).join('')}
+                                ${reach.length > 10 ? `<div style="margin-top: 10px; color: #6c757d; font-style: italic;">...and ${reach.length - 10} more</div>` : ''}
+                            </div>
+                        </div>
+                    `;
+
+                    card.querySelector('.profile-card-header').onclick = () => {
+                        card.classList.toggle('expanded');
+                    };
+
+                    display.appendChild(card);
+                });
+            }
+
+            // Update stats
+            const avgReach = filtered.length > 0 ? 
+                Math.round(filtered.reduce((sum, c) => {
+                    return sum + toolData.relationships.filter(r => r.connectorId === c.id).length;
+                }, 0) / filtered.length) : 0;
+
+            const topConnector = filtered.length > 0 ? filtered[0].name : 'N/A';
+
+            document.getElementById('connections-stats').innerHTML = `
+                <div class="stat">
+                    <span class="stat-value">${toolData.mutualConnections.length}</span>
+                    <span class="stat-label">Total Connectors</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-value">${filtered.length}</span>
+                    <span class="stat-label">Filtered</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-value">${avgReach}</span>
+                    <span class="stat-label">Avg Reach</span>
+                </div>
+            `;
+        }
+
+        // ========== FIRMS VIEW ==========
+        function renderFirmsView() {
+            const search = document.getElementById('firms-search').value.toLowerCase();
+            const typeFilter = document.getElementById('firms-type').value;
+            const locationFilter = document.getElementById('firms-location').value;
+            const statusFilter = document.getElementById('firms-status').value;
+
+            let filtered = toolData.firms.filter(firm => {
+                const matchesSearch = !search || firm.name.toLowerCase().includes(search);
+                const matchesType = !typeFilter || firm.type === typeFilter;
+                const matchesLocation = !locationFilter || (firm.normalizedState && firm.normalizedState.includes(locationFilter));
+                const matchesStatus = !statusFilter || firm.status === statusFilter;
+
+                return matchesSearch && matchesType && matchesLocation && matchesStatus;
+            });
+
+            const tbody = document.getElementById('firms-table-body');
+            tbody.innerHTML = '';
+
+            filtered.forEach(firm => {
+                const row = tbody.insertRow();
+                row.className = 'clickable-row';
+                row.onclick = () => showFirmDetail(firm);
+
+                const contactCount = toolData.prospects.filter(p => p.firmId === firm.id).length;
+                const pathCount = toolData.relationships.filter(r => r.firmId === firm.id).length;
+
+                const typeClass = firm.type.toLowerCase().replace(/[^a-z]/g, '-');
+                const statusClass = firm.status.toLowerCase().replace(/[^a-z]/g, '-');
+
+                row.innerHTML = `
+                    <td><strong>${firm.name}</strong></td>
+                    <td><span class="badge badge-${typeClass}">${firm.type}</span></td>
+                    <td>${firm.location}</td>
+                    <td>${formatAUM(firm.aum)}</td>
+                    <td><span class="badge badge-${statusClass}">${firm.status.replace(/_/g, ' ')}</span></td>
+                    <td>${contactCount}</td>
+                    <td>${getWarmPathBadge(pathCount)}</td>
+                `;
+            });
+
+            // Update stats
+            const statuses = {
+                target_prospect: toolData.firms.filter(f => f.status === 'target_prospect').length,
+                cold_lead: toolData.firms.filter(f => f.status === 'cold_lead').length,
+                past_contact: toolData.firms.filter(f => f.status === 'past_contact').length
+            };
+
+            document.getElementById('firms-stats').innerHTML = `
+                <div class="stat">
+                    <span class="stat-value">${toolData.firms.length}</span>
+                    <span class="stat-label">Total Firms</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-value">${filtered.length}</span>
+                    <span class="stat-label">Filtered</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-value">${statuses.target_prospect}</span>
+                    <span class="stat-label">Target Prospects</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-value">${statuses.past_contact}</span>
+                    <span class="stat-label">Past Contacts</span>
+                </div>
+            `;
+        }
+
+        // ========== TEAM VIEW ==========
+        function renderTeamView() {
+            const search = document.getElementById('team-search').value.toLowerCase();
+            const sortBy = document.getElementById('team-sort').value;
+
+            let filtered = toolData.teamMembers.filter(member => {
+                return !search || 
+                    member.name.toLowerCase().includes(search) ||
+                    member.role.toLowerCase().includes(search);
+            });
+
+            // Calculate metrics for each team member
+            filtered = filtered.map(member => {
+                const rels = toolData.relationships.filter(r => r.teamMemberId === member.id);
+                const connectors = new Set(rels.map(r => r.connectorId)).size;
+                const firms = new Set(rels.map(r => r.firmId).filter(id => id)).size;
+                const prospects = new Set(rels.map(r => r.prospectId)).size;
+
+                return { ...member, connectors, firms, prospects };
+            });
+
+            // Sort
+            filtered.sort((a, b) => {
+                if (sortBy === 'reach') return b.prospects - a.prospects;
+                if (sortBy === 'connectors') return b.connectors - a.connectors;
+                if (sortBy === 'alpha') return a.name.localeCompare(b.name);
+                return 0;
+            });
+
+            const tbody = document.getElementById('team-table-body');
+            tbody.innerHTML = '';
+
+            filtered.forEach(member => {
+                const row = tbody.insertRow();
+                row.className = 'clickable-row';
+                row.onclick = () => showTeamDetail(member);
+
+                row.innerHTML = `
+                    <td><strong>${member.name}</strong></td>
+                    <td>${member.role}</td>
+                    <td>${member.location}</td>
+                    <td>${member.connectors}</td>
+                    <td>${member.firms}</td>
+                    <td>${member.prospects}</td>
+                `;
+            });
+
+            // Update stats
+            const totalReach = filtered.reduce((sum, m) => sum + m.prospects, 0);
+            const avgReach = filtered.length > 0 ? Math.round(totalReach / filtered.length) : 0;
+
+            document.getElementById('team-stats').innerHTML = `
+                <div class="stat">
+                    <span class="stat-value">${toolData.teamMembers.length}</span>
+                    <span class="stat-label">Team Members</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-value">${avgReach}</span>
+                    <span class="stat-label">Avg Reach</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-value">${totalReach}</span>
+                    <span class="stat-label">Total Reach</span>
+                </div>
+            `;
+        }
+
+        // ========== DETAIL MODALS ==========
+        function showFirmDetail(firm) {
+            // Reset team filter for new modal
+            window.currentTeamFilter = 'all';
+            
+            const contacts = toolData.prospects.filter(p => p.firmId === firm.id);
+            const paths = toolData.relationships.filter(r => r.firmId === firm.id);
+
+            // Build connector rankings - which connectors can reach the most contacts at this firm
+            const connectorReach = {};
+            paths.forEach(p => {
+                const connector = toolData.mutualConnections.find(c => c.id === p.connectorId);
+                const prospect = toolData.prospects.find(pr => pr.id === p.prospectId);
+                const team = toolData.teamMembers.find(t => t.id === p.teamMemberId);
+                if (!connector || !prospect) return;
+                
+                if (!connectorReach[connector.id]) {
+                    connectorReach[connector.id] = {
+                        connector: connector,
+                        team: team,
+                        contacts: new Set(),
+                        contactNames: [],
+                        contactIds: [],
+                        contactObjects: []
+                    };
+                }
+                connectorReach[connector.id].contacts.add(prospect.id);
+                if (!connectorReach[connector.id].contactNames.includes(prospect.name)) {
+                    connectorReach[connector.id].contactNames.push(prospect.name);
+                    connectorReach[connector.id].contactIds.push(prospect.id);
+                    connectorReach[connector.id].contactObjects.push(prospect);
+                }
+            });
+
+            // All connectors sorted by reach
+            const allConnectorsSorted = Object.values(connectorReach)
+                .sort((a, b) => b.contacts.size - a.contacts.size);
+            
+            // Multi-path connectors (reach 2+ contacts)
+            const multiPathConnectors = allConnectorsSorted.filter(c => c.contacts.size >= 2);
+            
+            // Top 5 by reach
+            const top5Connectors = allConnectorsSorted.slice(0, 5);
+
+            // Build paths by contact for the collapsible sections
+            const pathsByContact = {};
+            contacts.forEach(c => {
+                pathsByContact[c.id] = paths.filter(p => p.prospectId === c.id).map(p => {
+                    const team = toolData.teamMembers.find(t => t.id === p.teamMemberId);
+                    const connector = toolData.mutualConnections.find(conn => conn.id === p.connectorId);
+                    return { team, connector, prospectId: c.id, prospectName: c.name, firmName: firm.name, firmId: firm.id };
+                });
+            });
+
+            // Store data globally for dynamic filtering
+            window.currentFirmData = {
+                firm,
+                contacts,
+                paths,
+                connectorReach,
+                allConnectorsSorted,
+                multiPathConnectors,
+                top5Connectors,
+                pathsByContact
+            };
+
+            // Build Sankey section with filters
+            let sankeyHTML = '';
+            if (paths.length > 0) {
+                sankeyHTML = `
+                    <div class="detail-section">
+                        <h3>📊 Introduction Flow</h3>
+                        <p style="color: #6c757d; font-size: 14px; margin-bottom: 15px;">Visual map showing your best paths into ${firm.name}</p>
+                        <div class="sankey-controls">
+                            <button class="sankey-filter-btn active" onclick="filterSankey('top5')">Top 5 by Reach</button>
+                            <button class="sankey-filter-btn" onclick="filterSankey('multipath')">Multi-Path Only (${multiPathConnectors.length})</button>
+                            ${allConnectorsSorted.length <= 10 ? `<button class="sankey-filter-btn" onclick="filterSankey('all')">All (${allConnectorsSorted.length})</button>` : ''}
+                        </div>
+                        <div class="sankey-container">
+                            <div id="sankey-chart"></div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            // Get unique team members who have paths to this firm
+            const teamMembersWithPaths = [...new Set(paths.map(p => {
+                const team = toolData.teamMembers.find(t => t.id === p.teamMemberId);
+                return team?.name;
+            }).filter(n => n))];
+
+            // Build Contacts section with view toggle AND team filter
+            let contactsHTML = '';
+            if (contacts.length > 0) {
+                const teamFilterButtons = teamMembersWithPaths.length > 1 ? `
+                    <div class="team-filter-container">
+                        <span class="team-filter-label">Filter by Team:</span>
+                        <button class="team-filter-btn active" onclick="filterContactsByTeam('all')">All</button>
+                        ${teamMembersWithPaths.map(name => `
+                            <button class="team-filter-btn" onclick="filterContactsByTeam('${name}')">${name.split(' ')[0]}</button>
+                        `).join('')}
+                    </div>
+                ` : '';
+
+                contactsHTML = `
+                    <div class="detail-section">
+                        <h3>👥 Contacts & Pathways</h3>
+                        ${teamFilterButtons}
+                        <div class="contacts-view-toggle">
+                            <button class="view-toggle-btn active" onclick="switchContactsView('byContact')">By Contact</button>
+                            <button class="view-toggle-btn" onclick="switchContactsView('byConnector')">By Connector</button>
+                        </div>
+                        <div id="contacts-display">
+                            ${renderContactsByContact(contacts, pathsByContact, firm)}
+                        </div>
+                    </div>
+                `;
+            }
+
+            // No paths message if needed
+            let noPathsMessage = '';
+            if (paths.length === 0 && contacts.length > 0) {
+                noPathsMessage = `
+                    <div class="detail-section">
+                        <div class="no-paths">No warm introduction paths found to any contacts. Consider cold outreach or seeking 2nd degree connections.</div>
+                    </div>
+                `;
+            }
+
+            document.getElementById('modal-name').textContent = firm.name;
+            document.getElementById('modal-subtitle').textContent = `${firm.type} • ${firm.location}`;
+            document.getElementById('modal-body').innerHTML = `
+                <div class="detail-section">
+                    <h3>Overview</h3>
+                    <p><strong>AUM:</strong> ${formatAUM(firm.aum)}</p>
+                    <p><strong>Status:</strong> <span class="badge badge-${firm.status.replace(/_/g, '-')}">${firm.status.replace(/_/g, ' ')}</span></p>
+                    ${firm.website ? `<p><strong>Website:</strong> <a href="${firm.website}" target="_blank">${firm.website}</a></p>` : ''}
+                    ${firm.linkedin ? `<p><strong>LinkedIn:</strong> <a href="${firm.linkedin}" target="_blank">View Company Page</a></p>` : ''}
+                </div>
+                ${firm.description ? `
+                    <div class="detail-section">
+                        <h3>Description</h3>
+                        <p>${firm.description}</p>
+                    </div>
+                ` : ''}
+                ${sankeyHTML}
+                ${contactsHTML}
+                ${noPathsMessage}
+                ${firm.notes ? `
+                    <div class="detail-section">
+                        <h3>Notes</h3>
+                        <p>${firm.notes}</p>
+                    </div>
+                ` : ''}
+            `;
+
+            document.getElementById('detail-modal').style.display = 'block';
+            
+            // Draw Sankey chart with top 5 by default
+            if (paths.length > 0) {
+                setTimeout(() => filterSankey('top5'), 100);
+            }
+        }
+
+        // Render contacts grouped by contact (default view)
+        function renderContactsByContact(contacts, pathsByContact, firm, teamFilter = 'all') {
+            // Sort contacts: those with multiple team members (overlap) first, then by path count
+            const sortedContacts = [...contacts].sort((a, b) => {
+                const aPathsRaw = pathsByContact[a.id] || [];
+                const bPathsRaw = pathsByContact[b.id] || [];
+                
+                // Count unique team members per contact
+                const aTeams = new Set(aPathsRaw.map(p => p.team?.name).filter(n => n));
+                const bTeams = new Set(bPathsRaw.map(p => p.team?.name).filter(n => n));
+                
+                // Overlaps (2+ team members) first
+                if (aTeams.size > 1 && bTeams.size <= 1) return -1;
+                if (bTeams.size > 1 && aTeams.size <= 1) return 1;
+                
+                // Then by path count
+                return bPathsRaw.length - aPathsRaw.length;
+            });
+
+            return sortedContacts.map((c, idx) => {
+                let contactPaths = pathsByContact[c.id] || [];
+                
+                // Filter by team if specified
+                if (teamFilter && teamFilter !== 'all') {
+                    contactPaths = contactPaths.filter(p => p.team?.name === teamFilter);
+                }
+                
+                const pathCount = contactPaths.length;
+                const hasPathsClass = pathCount > 0 ? 'has-paths' : '';
+                
+                // Check for overlapping team members (before filter)
+                const allPaths = pathsByContact[c.id] || [];
+                const uniqueTeams = new Set(allPaths.map(p => p.team?.name).filter(n => n));
+                const hasOverlap = uniqueTeams.size > 1;
+                const overlapBadge = hasOverlap ? `<span class="overlap-badge">${uniqueTeams.size} team</span>` : '';
+                
+                return `
+                    <div class="contact-card-collapsible" id="contact-card-${idx}">
+                        <div class="contact-card-header-row" onclick="toggleContactPaths(${idx})">
+                            <div class="contact-card-left">
+                                <div class="contact-name">${c.name} ${overlapBadge}</div>
+                                <div class="contact-title">${c.title}</div>
+                                ${c.linkedin ? `<div style="margin-top: 6px;"><a href="${c.linkedin}" target="_blank" onclick="event.stopPropagation();" style="color: #5FC4B8; font-size: 13px;">🔗 LinkedIn</a></div>` : ''}
+                            </div>
+                            <div class="contact-card-right">
+                                <span class="contact-path-count ${hasPathsClass}">
+                                    ${pathCount > 0 ? `${pathCount} intro path${pathCount > 1 ? 's' : ''}` : 'No paths'}
+                                </span>
+                                ${pathCount > 0 ? '<span class="contact-expand-icon">▼</span>' : ''}
+                            </div>
+                        </div>
+                        ${pathCount > 0 ? `
+                            <div class="contact-paths-container">
+                                <div style="font-size: 13px; color: #6c757d; margin-bottom: 10px;">People who can introduce you to ${c.name}:</div>
+                                <div class="contact-paths-grid">
+                                    ${contactPaths.map((p, pathIdx) => {
+                                        const pathId = `${firm.id}-${c.id}-${p.connector?.id || pathIdx}`;
+                                        const isSaved = isPathSaved(pathId);
+                                        return `
+                                        <div class="mini-path-item" style="display: flex; justify-content: space-between; align-items: flex-start;">
+                                            <div style="flex: 1;">
+                                                <div class="connector-name">${p.connector?.name || 'Unknown'}</div>
+                                                <div class="connector-detail">${p.connector?.title || ''}${p.connector?.company ? `, ${p.connector.company}` : ''}</div>
+                                                <div class="connector-detail" style="color: #5FC4B8;">via ${p.team?.name || 'Unknown'}</div>
+                                            </div>
+                                            <button class="save-path-btn ${isSaved ? 'saved' : ''}" 
+                                                onclick="event.stopPropagation(); toggleSavePath('${pathId}', '${firm.name.replace(/'/g, "\\'")}', '${p.team?.name || 'Unknown'}', '${(p.connector?.name || 'Unknown').replace(/'/g, "\\'")}', '${c.name.replace(/'/g, "\\'")}')"
+                                                title="${isSaved ? 'Remove from saved' : 'Save this path'}">
+                                                ${isSaved ? '★' : '☆'}
+                                            </button>
+                                        </div>
+                                    `}).join('')}
+                                </div>
+                            </div>
+                        ` : ''}
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Render contacts grouped by connector (alternate view)
+        function renderContactsByConnector(teamFilter = 'all') {
+            const data = window.currentFirmData;
+            if (!data) return '';
+            
+            let { allConnectorsSorted, firm } = data;
+            
+            // Filter by team if specified
+            if (teamFilter && teamFilter !== 'all') {
+                allConnectorsSorted = allConnectorsSorted.filter(rc => rc.team?.name === teamFilter);
+            }
+            
+            return allConnectorsSorted.map((rc, idx) => {
+                const isMultiPath = rc.contacts.size >= 2;
+                return `
+                    <div class="connector-group-card" id="connector-group-${idx}">
+                        <div class="connector-group-header" onclick="toggleConnectorGroup(${idx})">
+                            <div class="connector-group-info">
+                                <div class="connector-group-name">
+                                    ${rc.connector.name}
+                                    ${isMultiPath ? '<span class="multi-path-badge">Multi-Path</span>' : ''}
+                                </div>
+                                <div class="connector-group-title">${rc.connector.title}${rc.connector.company ? `, ${rc.connector.company}` : ''}</div>
+                                <div class="connector-group-meta">via ${rc.team?.name || 'Unknown'} • ${rc.connector.mutualCount || 0} LinkedIn connections</div>
+                            </div>
+                            <div class="connector-group-stats">
+                                <div class="connector-group-count">${rc.contacts.size}</div>
+                                <div class="connector-group-label">contact${rc.contacts.size > 1 ? 's' : ''}</div>
+                            </div>
+                        </div>
+                        <div class="connector-group-contacts">
+                            <div style="font-size: 13px; color: #6c757d; margin-bottom: 12px;">${rc.connector.name} can introduce you to:</div>
+                            ${rc.contactObjects.map(contact => {
+                                const pathId = `${firm.id}-${contact.id}-${rc.connector.id}`;
+                                const isSaved = isPathSaved(pathId);
+                                return `
+                                    <div class="connector-contact-item">
+                                        <div>
+                                            <div class="connector-contact-name">${contact.name}</div>
+                                            <div class="connector-contact-title">${contact.title}</div>
+                                        </div>
+                                        <button class="save-path-btn ${isSaved ? 'saved' : ''}" 
+                                            onclick="toggleSavePath('${pathId}', '${firm.name.replace(/'/g, "\\'")}', '${rc.team?.name || 'Unknown'}', '${rc.connector.name.replace(/'/g, "\\'")}', '${contact.name.replace(/'/g, "\\'")}')"
+                                            title="${isSaved ? 'Remove from saved' : 'Save this path'}">
+                                            ${isSaved ? '★' : '☆'}
+                                        </button>
+                                    </div>
+                                `;
+                            }).join('')}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Switch between contact views
+        function switchContactsView(view) {
+            const data = window.currentFirmData;
+            if (!data) return;
+            
+            // Update toggle buttons
+            document.querySelectorAll('.view-toggle-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            // Get current team filter
+            const teamFilter = window.currentTeamFilter || 'all';
+            
+            const display = document.getElementById('contacts-display');
+            if (view === 'byContact') {
+                display.innerHTML = renderContactsByContact(data.contacts, data.pathsByContact, data.firm, teamFilter);
+            } else {
+                display.innerHTML = renderContactsByConnector(teamFilter);
+            }
+        }
+
+        // Toggle connector group expansion
+        function toggleConnectorGroup(idx) {
+            const card = document.getElementById(`connector-group-${idx}`);
+            if (card) {
+                card.classList.toggle('expanded');
+            }
+        }
+
+        // Filter contacts by team member
+        function filterContactsByTeam(teamName) {
+            const data = window.currentFirmData;
+            if (!data) return;
+            
+            // Update filter buttons
+            document.querySelectorAll('.team-filter-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            // Store current team filter
+            window.currentTeamFilter = teamName;
+            
+            // Re-render current view with filter applied
+            const activeViewBtn = document.querySelector('.view-toggle-btn.active');
+            const currentView = activeViewBtn?.textContent.includes('Contact') ? 'byContact' : 'byConnector';
+            
+            const display = document.getElementById('contacts-display');
+            if (currentView === 'byContact') {
+                display.innerHTML = renderContactsByContact(data.contacts, data.pathsByContact, data.firm, teamName);
+            } else {
+                display.innerHTML = renderContactsByConnector(teamName);
+            }
+        }
+
+        // Filter Sankey chart
+        function filterSankey(mode) {
+            const data = window.currentFirmData;
+            if (!data) return;
+            
+            // Update filter buttons
+            document.querySelectorAll('.sankey-filter-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            let connectorsToShow;
+            switch(mode) {
+                case 'multipath':
+                    connectorsToShow = data.multiPathConnectors.slice(0, 8);
+                    break;
+                case 'all':
+                    connectorsToShow = data.allConnectorsSorted.slice(0, 10);
+                    break;
+                case 'top5':
+                default:
+                    connectorsToShow = data.top5Connectors;
+            }
+            
+            // Build flow data for selected connectors
+            const flowCounts = {};
+            const connectorIds = new Set(connectorsToShow.map(c => c.connector.id));
+            
+            data.paths.forEach(p => {
+                if (!connectorIds.has(p.connectorId)) return;
+                
+                const team = toolData.teamMembers.find(t => t.id === p.teamMemberId);
+                const connector = toolData.mutualConnections.find(c => c.id === p.connectorId);
+                const prospect = toolData.prospects.find(pr => pr.id === p.prospectId);
+                if (!team || !connector || !prospect) return;
+                
+                const tcKey = `${team.name}|${connector.name}`;
+                flowCounts[tcKey] = (flowCounts[tcKey] || 0) + 1;
+                
+                const cpKey = `${connector.name}|${prospect.name}`;
+                flowCounts[cpKey] = (flowCounts[cpKey] || 0) + 1;
+            });
+            
+            window.currentSankeyData = flowCounts;
+            drawSankeyChart();
+        }
+
+        function toggleContactPaths(idx) {
+            const card = document.getElementById(`contact-card-${idx}`);
+            if (card) {
+                card.classList.toggle('expanded');
+            }
+        }
+
+        function toggleConnectorList(idx) {
+            const item = document.getElementById(`connector-list-${idx}`);
+            if (item) {
+                item.classList.toggle('expanded');
+            }
+        }
+
+        function showConnectorInfo(connectorId) {
+            const connector = toolData.mutualConnections.find(c => c.id === connectorId);
+            if (!connector) return;
+
+            const paths = toolData.relationships.filter(r => r.connectorId === connectorId);
+            const uniqueFirms = new Set(paths.map(r => r.firmId));
+            const uniqueProspects = new Set(paths.map(r => r.prospectId));
+
+            const modalBody = `
+                <div class="detail-section">
+                    <h3>Role & Company</h3>
+                    <p><strong>${connector.title}</strong>${connector.company ? ` at ${connector.company}` : ''}</p>
+                    ${connector.location ? `<p>📍 ${connector.location}</p>` : ''}
+                </div>
+                <div class="detail-section">
+                    <h3>Contact Information</h3>
+                    ${connector.email ? `<p>📧 <a href="mailto:${connector.email}">${connector.email}</a></p>` : ''}
+                    ${connector.phone ? `<p>📱 ${connector.phone}</p>` : ''}
+                    ${connector.linkedin ? `<p>🔗 <a href="${connector.linkedin}" target="_blank">LinkedIn Profile</a></p>` : ''}
+                    ${!connector.email && !connector.phone && !connector.linkedin ? '<p style="color: #6c757d; font-style: italic;">No contact info available</p>' : ''}
+                </div>
+                <div class="detail-section">
+                    <h3>Reach Statistics</h3>
+                    <p>Can connect to <strong>${uniqueProspects.size} prospects</strong> at <strong>${uniqueFirms.size} firms</strong></p>
+                    <p>Total relationship paths: <strong>${paths.length}</strong></p>
+                </div>
+                <div class="detail-section">
+                    <h3>Known By (FourBridge Team)</h3>
+                    <div style="background: #f8f9fa; padding: 15px; border-radius: 8px;">
+                        ${connector.teamConnections && connector.teamConnections.length > 0 ? 
+                            connector.teamConnections.map(tc => `<div style="margin: 8px 0;">• ${tc}</div>`).join('') :
+                            '<p style="color: #6c757d; font-style: italic;">No team connections listed</p>'}
+                    </div>
+                </div>
+                <div class="detail-section">
+                    <h3>Can Introduce To</h3>
+                    <div style="max-height: 400px; overflow-y: auto;">
+                        ${paths.length > 0 ? paths.map(r => {
+                            const prospect = toolData.prospects.find(p => p.id === r.prospectId);
+                            const firm = toolData.firms.find(f => f.id === r.firmId);
+                            if (!prospect) return '';
+                            return `
+                                <div style="padding: 10px; margin: 8px 0; background: #f8f9fa; border-left: 3px solid #5FC4B8; border-radius: 4px; cursor: pointer;" onclick="showProspectDetail(${JSON.stringify(prospect).replace(/"/g, '&quot;')})">
+                                    <div style="font-weight: 600; color: #2d3748;">${prospect.name}</div>
+                                    <div style="color: #6c757d; font-size: 14px; margin-top: 4px;">${prospect.title}${firm ? ` at ${firm.name}` : ''}</div>
+                                </div>
+                            `;
+                        }).join('') : '<p style="color: #6c757d; font-style: italic;">No prospects linked yet</p>'}
+                    </div>
+                </div>
+            `;
+
+            document.getElementById('modal-name').textContent = connector.name;
+            document.getElementById('modal-subtitle').textContent = connector.title ? `${connector.title}${connector.company ? ` at ${connector.company}` : ''}` : '';
+            document.getElementById('modal-body').innerHTML = modalBody;
+            document.getElementById('detail-modal').style.display = 'block';
+        }
+
+        function showProspectDetail(prospect) {
+            const firm = toolData.firms.find(f => f.id === prospect.firmId);
+            const paths = toolData.relationships.filter(r => r.prospectId === prospect.id);
+
+            let pathsHTML = '';
+            if (paths.length > 0) {
+                pathsHTML = `
+                    <div class="detail-section">
+                        <h3>🔗 Warm Introduction Paths (${paths.length})</h3>
+                        <div class="path-list">
+                            ${paths.map(p => {
+                                const team = toolData.teamMembers.find(t => t.id === p.teamMemberId);
+                                const connector = toolData.mutualConnections.find(c => c.id === p.connectorId);
+                                return `
+                                    <div class="path-item">
+                                        <div class="path-chain">${team?.name} → ${connector?.name} → ${prospect.name}</div>
+                                        <div class="path-details">${connector?.title}, ${connector?.company}</div>
+                                    </div>
+                                `;
+                            }).join('')}
+                        </div>
+                    </div>
+                `;
+            } else {
+                pathsHTML = `
+                    <div class="detail-section">
+                        <h3>🔗 Warm Introduction Paths</h3>
+                        <div class="no-paths">No warm introduction paths found.</div>
+                    </div>
+                `;
+            }
+
+            document.getElementById('modal-name').textContent = prospect.name;
+            document.getElementById('modal-subtitle').textContent = prospect.title;
+            document.getElementById('modal-body').innerHTML = `
+                <div class="detail-section">
+                    <h3>Organization</h3>
+                    <p><strong>${prospect.firmName}</strong></p>
+                    ${firm ? `
+                        <p>${firm.type} • ${firm.location}</p>
+                        <p><strong>AUM:</strong> ${formatAUM(firm.aum)}</p>
+                    ` : ''}
+                </div>
+                ${pathsHTML}
+                <div class="detail-section">
+                    <h3>Contact Information</h3>
+                    ${prospect.email ? `<p>📧 ${prospect.email}</p>` : ''}
+                    ${prospect.phone ? `<p>📞 ${prospect.phone}</p>` : ''}
+                    ${prospect.linkedin ? `<p>🔗 <a href="${prospect.linkedin}" target="_blank">LinkedIn Profile</a></p>` : ''}
+                </div>
+            `;
+
+            document.getElementById('detail-modal').style.display = 'block';
+        }
+
+        function showTeamDetail(member) {
+            const rels = toolData.relationships.filter(r => r.teamMemberId === member.id);
+            const uniqueConnectors = [...new Set(rels.map(r => r.connectorId))];
+            const uniqueFirms = [...new Set(rels.map(r => r.firmId).filter(id => id))];
+            const uniqueProspects = [...new Set(rels.map(r => r.prospectId))];
+
+            document.getElementById('modal-name').textContent = member.name;
+            document.getElementById('modal-subtitle').textContent = member.role;
+            document.getElementById('modal-body').innerHTML = `
+                <div class="detail-section">
+                    <h3>Network Reach</h3>
+                    <p><strong>Connectors:</strong> ${uniqueConnectors.length}</p>
+                    <p><strong>Firms Reachable:</strong> ${uniqueFirms.length}</p>
+                    <p><strong>Prospects Reachable:</strong> ${uniqueProspects.length}</p>
+                </div>
+                <div class="detail-section">
+                    <h3>Contact</h3>
+                    ${member.email ? `<p>📧 ${member.email}</p>` : ''}
+                    ${member.phone ? `<p>📞 ${member.phone}</p>` : ''}
+                    ${member.linkedin ? `<p>🔗 <a href="${member.linkedin}" target="_blank">LinkedIn Profile</a></p>` : ''}
+                </div>
+                <div class="detail-section">
+                    <h3>Top Connectors</h3>
+                    ${uniqueConnectors.slice(0, 10).map(cId => {
+                        const connector = toolData.mutualConnections.find(c => c.id === cId);
+                        const count = rels.filter(r => r.connectorId === cId).length;
+                        return `<p>• ${connector?.name} (${count} connections)</p>`;
+                    }).join('')}
+                </div>
+            `;
+
+            document.getElementById('detail-modal').style.display = 'block';
+        }
+
+        function closeModal(event) {
+            if (!event || event.target.id === 'detail-modal') {
+                document.getElementById('detail-modal').style.display = 'none';
+            }
+        }
+
+        // ========== UTILITY FUNCTIONS ==========
+        function formatAUM(aum) {
+            if (!aum || aum === 0) return 'N/A';
+            if (aum >= 1000) return `$${(aum / 1000).toFixed(1)}B`;
+            return `$${aum.toFixed(0)}M`;
+        }
+
+        function getWarmPathBadge(pathCount) {
+            if (pathCount === 0) {
+                return '<span style="color: #6c757d;">—</span>';
+            }
+            
+            let badgeClass = 'badge-paths-low';
+            if (pathCount >= 20) {
+                badgeClass = 'badge-paths-high';
+            } else if (pathCount >= 6) {
+                badgeClass = 'badge-paths-medium';
+            }
+            
+            return `<span class="badge ${badgeClass}">✓ ${pathCount} path${pathCount > 1 ? 's' : ''}</span>`;
+        }
+
+        function updateFooter() {
+            const totalFirms = toolData.firms.length;
+            const reachableFirms = toolData.firms.filter(f => 
+                toolData.relationships.some(r => r.firmId === f.id)
+            ).length;
+            
+            document.getElementById('footer-firms').textContent = totalFirms;
+            document.getElementById('footer-reachable').textContent = reachableFirms;
+            document.getElementById('footer-version').textContent = `v${toolData.version}`;
+            document.getElementById('footer-sync-time').textContent = 'just now';
+        }
+
+        // ========== SORTING ==========
+        let firmsSortCol = -1;
+        let firmsSortAsc = true;
+        let peopleSortCol = -1;
+        let peopleSortAsc = true;
+        let firmsDbSortCol = -1;
+        let firmsDbSortAsc = true;
+
+        function updateSortIndicators(tableId, col, ascending) {
+            const headers = document.querySelectorAll(`#${tableId} th`);
+            headers.forEach((h, i) => {
+                h.classList.remove('sorted-asc', 'sorted-desc');
+                if (i === col) {
+                    h.classList.add(ascending ? 'sorted-asc' : 'sorted-desc');
+                }
+            });
+        }
+
+        function sortProspectsTable(col) {
+            if (firmsSortCol === col) {
+                firmsSortAsc = !firmsSortAsc;
+            } else {
+                firmsSortCol = col;
+                firmsSortAsc = true;
+            }
+            updateSortIndicators('prospects-table', col, firmsSortAsc);
+            
+            const tbody = document.getElementById('prospects-table-body');
+            const rows = Array.from(tbody.rows);
+            
+            rows.sort((a, b) => {
+                let aVal = a.cells[col].textContent.trim();
+                let bVal = b.cells[col].textContent.trim();
+                
+                // Handle AUM column (parse currency)
+                if (col === 3) {
+                    aVal = aVal === 'N/A' ? 0 : parseFloat(aVal.replace(/[$BMN\/A]/g, '')) * (aVal.includes('B') ? 1000 : 1);
+                    bVal = bVal === 'N/A' ? 0 : parseFloat(bVal.replace(/[$BMN\/A]/g, '')) * (bVal.includes('B') ? 1000 : 1);
+                }
+                // Handle Contacts and Priority columns (numeric)
+                else if (col === 4 || col === 6) {
+                    aVal = aVal === '—' ? -1 : parseInt(aVal) || 0;
+                    bVal = bVal === '—' ? -1 : parseInt(bVal) || 0;
+                }
+                // Handle Warm Paths column (parse number from badge)
+                else if (col === 5) {
+                    const aMatch = aVal.match(/(\d+)/);
+                    const bMatch = bVal.match(/(\d+)/);
+                    aVal = aMatch ? parseInt(aMatch[1]) : 0;
+                    bVal = bMatch ? parseInt(bMatch[1]) : 0;
+                }
+                
+                if (aVal < bVal) return firmsSortAsc ? -1 : 1;
+                if (aVal > bVal) return firmsSortAsc ? 1 : -1;
+                return 0;
+            });
+            
+            rows.forEach(row => tbody.appendChild(row));
+        }
+
+        function sortProspectsPeopleTable(col) {
+            if (peopleSortCol === col) {
+                peopleSortAsc = !peopleSortAsc;
+            } else {
+                peopleSortCol = col;
+                peopleSortAsc = true;
+            }
+            updateSortIndicators('prospects-people-table', col, peopleSortAsc);
+            
+            const tbody = document.getElementById('prospects-people-table-body');
+            const rows = Array.from(tbody.rows);
+            
+            rows.sort((a, b) => {
+                let aVal = a.cells[col].textContent.trim();
+                let bVal = b.cells[col].textContent.trim();
+                
+                // Handle Warm Paths column (parse number from badge)
+                if (col === 6) {
+                    const aMatch = aVal.match(/(\d+)/);
+                    const bMatch = bVal.match(/(\d+)/);
+                    aVal = aMatch ? parseInt(aMatch[1]) : 0;
+                    bVal = bMatch ? parseInt(bMatch[1]) : 0;
+                }
+                
+                if (aVal < bVal) return peopleSortAsc ? -1 : 1;
+                if (aVal > bVal) return peopleSortAsc ? 1 : -1;
+                return 0;
+            });
+            
+            rows.forEach(row => tbody.appendChild(row));
+        }
+
+        function sortFirmsTable(col) {
+            if (firmsDbSortCol === col) {
+                firmsDbSortAsc = !firmsDbSortAsc;
+            } else {
+                firmsDbSortCol = col;
+                firmsDbSortAsc = true;
+            }
+            updateSortIndicators('firms-table', col, firmsDbSortAsc);
+            
+            const tbody = document.getElementById('firms-table-body');
+            const rows = Array.from(tbody.rows);
+            
+            rows.sort((a, b) => {
+                let aVal = a.cells[col].textContent.trim();
+                let bVal = b.cells[col].textContent.trim();
+                
+                // Handle AUM column (parse currency)
+                if (col === 3) {
+                    aVal = aVal === 'N/A' ? 0 : parseFloat(aVal.replace(/[$BMN\/A]/g, '')) * (aVal.includes('B') ? 1000 : 1);
+                    bVal = bVal === 'N/A' ? 0 : parseFloat(bVal.replace(/[$BMN\/A]/g, '')) * (bVal.includes('B') ? 1000 : 1);
+                }
+                // Handle Contacts column (numeric)
+                else if (col === 5) {
+                    aVal = parseInt(aVal) || 0;
+                    bVal = parseInt(bVal) || 0;
+                }
+                // Handle Warm Paths column (parse number from badge)
+                else if (col === 6) {
+                    const aMatch = aVal.match(/(\d+)/);
+                    const bMatch = bVal.match(/(\d+)/);
+                    aVal = aMatch ? parseInt(aMatch[1]) : 0;
+                    bVal = bMatch ? parseInt(bMatch[1]) : 0;
+                }
+                
+                if (aVal < bVal) return firmsDbSortAsc ? -1 : 1;
+                if (aVal > bVal) return firmsDbSortAsc ? 1 : -1;
+                return 0;
+            });
+            
+            rows.forEach(row => tbody.appendChild(row));
+        }
+
+        function sortTeamTable(col) {
+            // Team table sorting - similar pattern
+        }
+
+        // ========== GOOGLE CHARTS - SANKEY ==========
+        let googleChartsLoaded = false;
+        
+        // Load Google Charts
+        google.charts.load('current', {'packages':['sankey']});
+        google.charts.setOnLoadCallback(() => {
+            googleChartsLoaded = true;
+        });
+
+        function drawSankeyChart() {
+            if (!googleChartsLoaded || !window.currentSankeyData) return;
+            
+            const chartDiv = document.getElementById('sankey-chart');
+            if (!chartDiv) return;
+            
+            const flowCounts = window.currentSankeyData;
+            const rows = [];
+            
+            // Convert flow counts to chart data
+            Object.entries(flowCounts).forEach(([key, count]) => {
+                const [from, to] = key.split('|');
+                rows.push([from, to, count]);
+            });
+            
+            if (rows.length === 0) return;
+            
+            const data = new google.visualization.DataTable();
+            data.addColumn('string', 'From');
+            data.addColumn('string', 'To');
+            data.addColumn('number', 'Weight');
+            data.addRows(rows);
+
+            const options = {
+                width: '100%',
+                height: 300,
+                sankey: {
+                    node: {
+                        colors: ['#004D4D', '#5FC4B8', '#28a745'],
+                        label: {
+                            fontName: '-apple-system, BlinkMacSystemFont, Segoe UI, Roboto, sans-serif',
+                            fontSize: 13,
+                            color: '#2d3748',
+                            bold: true
+                        },
+                        nodePadding: 20,
+                        width: 20
+                    },
+                    link: {
+                        colorMode: 'gradient',
+                        colors: ['#5FC4B8', '#28a745', '#ffc107']
+                    }
+                }
+            };
+
+            const chart = new google.visualization.Sankey(chartDiv);
+            chart.draw(data, options);
+        }
+
+        // ========== SAVED PATHS MANAGEMENT ==========
+        let savedPaths = [];
+
+        // Load saved paths from localStorage on init
+        function loadSavedPaths() {
+            try {
+                const stored = localStorage.getItem('fourbridge_saved_paths');
+                if (stored) {
+                    savedPaths = JSON.parse(stored);
+                }
+            } catch (e) {
+                console.log('Could not load saved paths:', e);
+            }
+            updateSavedPathsCount();
+        }
+
+        // Save to localStorage
+        function persistSavedPaths() {
+            try {
+                localStorage.setItem('fourbridge_saved_paths', JSON.stringify(savedPaths));
+            } catch (e) {
+                console.log('Could not save paths:', e);
+            }
+            updateSavedPathsCount();
+            renderSavedPathsPanel();
+        }
+
+        // Check if path is saved
+        function isPathSaved(pathId) {
+            return savedPaths.some(p => p.id === pathId);
+        }
+
+        // Toggle save/unsave a path
+        function toggleSavePath(pathId, firmName, teamName, connectorName, contactName) {
+            const existingIdx = savedPaths.findIndex(p => p.id === pathId);
+            
+            if (existingIdx >= 0) {
+                // Remove
+                savedPaths.splice(existingIdx, 1);
+            } else {
+                // Add
+                savedPaths.push({
+                    id: pathId,
+                    firmName: firmName,
+                    teamName: teamName,
+                    connectorName: connectorName,
+                    contactName: contactName,
+                    savedAt: new Date().toISOString()
+                });
+            }
+            
+            persistSavedPaths();
+            
+            // Update button state
+            const btn = event.target;
+            btn.classList.toggle('saved');
+            btn.textContent = btn.classList.contains('saved') ? '★' : '☆';
+        }
+
+        // Remove a specific saved path
+        function removeSavedPath(pathId) {
+            savedPaths = savedPaths.filter(p => p.id !== pathId);
+            persistSavedPaths();
+        }
+
+        // Update count in floating button
+        function updateSavedPathsCount() {
+            const countEl = document.getElementById('saved-paths-count');
+            if (countEl) {
+                countEl.textContent = savedPaths.length;
+            }
+        }
+
+        // Toggle saved paths panel visibility
+        function toggleSavedPathsPanel() {
+            const panel = document.getElementById('saved-paths-panel');
+            panel.classList.toggle('visible');
+            if (panel.classList.contains('visible')) {
+                renderSavedPathsPanel();
+            }
+        }
+
+        // Render the saved paths panel content
+        function renderSavedPathsPanel() {
+            const body = document.getElementById('saved-paths-body');
+            
+            if (savedPaths.length === 0) {
+                body.innerHTML = '<p style="color: #6c757d; text-align: center; padding: 20px;">No paths saved yet.<br>Click the ☆ icon on any connector to save.</p>';
+                return;
+            }
+            
+            // Group by firm
+            const byFirm = {};
+            savedPaths.forEach(p => {
+                if (!byFirm[p.firmName]) {
+                    byFirm[p.firmName] = [];
+                }
+                byFirm[p.firmName].push(p);
+            });
+            
+            let html = '';
+            Object.entries(byFirm).forEach(([firmName, paths]) => {
+                html += `<div style="margin-bottom: 15px;">
+                    <div style="font-size: 12px; font-weight: 700; color: #004D4D; text-transform: uppercase; margin-bottom: 8px;">${firmName} (${paths.length})</div>
+                    ${paths.map(p => `
+                        <div class="saved-path-item">
+                            <button class="saved-path-remove" onclick="removeSavedPath('${p.id}')">&times;</button>
+                            <div class="saved-path-chain">${p.teamName} → ${p.connectorName} → ${p.contactName}</div>
+                        </div>
+                    `).join('')}
+                </div>`;
+            });
+            
+            body.innerHTML = html;
+        }
+
+        // Export saved paths to clipboard (for pasting into Google Sheets)
+        function exportSavedPaths() {
+            if (savedPaths.length === 0) {
+                alert('No paths saved yet!');
+                return;
+            }
+            
+            // Format for Google Sheets: Tab-separated values
+            const headers = 'Firm\tTeam Member\tConnector\tContact\tSaved Date';
+            const rows = savedPaths.map(p => 
+                `${p.firmName}\t${p.teamName}\t${p.connectorName}\t${p.contactName}\t${p.savedAt.split('T')[0]}`
+            );
+            
+            const tsv = [headers, ...rows].join('\n');
+            
+            navigator.clipboard.writeText(tsv).then(() => {
+                alert(`Copied ${savedPaths.length} paths to clipboard!\n\nPaste directly into Google Sheets.`);
+            }).catch(err => {
+                // Fallback: show in a prompt
+                prompt('Copy this data and paste into Google Sheets:', tsv);
+            });
+        }
+
+        // Clear all saved paths
+        function clearSavedPaths() {
+            if (savedPaths.length === 0) return;
+            
+            if (confirm(`Clear all ${savedPaths.length} saved paths?`)) {
+                savedPaths = [];
+                persistSavedPaths();
+            }
+        }
+
+        // ========== START APPLICATION ==========
+        window.onload = function() {
+            loadSavedPaths();
+            initializeApp();
+        };
+    </script>
+</body>
+</html>
