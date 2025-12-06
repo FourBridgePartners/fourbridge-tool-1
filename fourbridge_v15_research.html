@@ -1,0 +1,2422 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FourBridge Relationship Intelligence System</title>
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f8f9fa;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            min-height: 100vh;
+        }
+
+        .header {
+            background: white;
+            color: #1a1a1a;
+            padding: 16px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #e9ecef;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .header-logo img {
+            height: 28px;
+            width: auto;
+        }
+
+        .header-logo-text {
+            font-size: 22px;
+            font-weight: 600;
+            color: #004D4D;
+            letter-spacing: -0.5px;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 4px;
+        }
+
+        .tab {
+            background: transparent;
+            color: #6c757d;
+            border: none;
+            padding: 10px 18px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .tab:hover {
+            background: #f8f9fa;
+            color: #1a1a1a;
+        }
+
+        .tab.active {
+            background: #004D4D;
+            color: white;
+        }
+
+        .tab.research-tab {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .tab.research-tab:hover {
+            opacity: 0.9;
+        }
+
+        .tab.research-tab.active {
+            background: linear-gradient(135deg, #5a6fd6 0%, #6a4190 100%);
+            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.4);
+        }
+
+        /* ============ NOTIFICATION BELL ============ */
+        .notification-bell {
+            position: relative;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 8px;
+            transition: background 0.2s;
+        }
+
+        .notification-bell:hover {
+            background: #f8f9fa;
+        }
+
+        .notification-bell svg {
+            width: 24px;
+            height: 24px;
+            fill: #6c757d;
+        }
+
+        .notification-badge {
+            position: absolute;
+            top: 2px;
+            right: 2px;
+            background: #dc3545;
+            color: white;
+            font-size: 11px;
+            font-weight: 600;
+            min-width: 18px;
+            height: 18px;
+            border-radius: 9px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 5px;
+        }
+
+        .notification-badge.hidden {
+            display: none;
+        }
+
+        /* Notification Dropdown */
+        .notification-dropdown {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            width: 380px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            z-index: 1000;
+            display: none;
+            overflow: hidden;
+        }
+
+        .notification-dropdown.show {
+            display: block;
+        }
+
+        .notification-dropdown-header {
+            padding: 16px 20px;
+            border-bottom: 1px solid #e9ecef;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .notification-dropdown-header h3 {
+            font-size: 16px;
+            font-weight: 600;
+            color: #1a1a1a;
+        }
+
+        .notification-dropdown-header button {
+            background: none;
+            border: none;
+            color: #6c757d;
+            font-size: 13px;
+            cursor: pointer;
+        }
+
+        .notification-dropdown-header button:hover {
+            color: #dc3545;
+        }
+
+        .notification-list {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .notification-item {
+            padding: 16px 20px;
+            border-bottom: 1px solid #f1f3f4;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .notification-item:hover {
+            background: #f8f9fa;
+        }
+
+        .notification-item:last-child {
+            border-bottom: none;
+        }
+
+        .notification-item-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 8px;
+        }
+
+        .notification-item-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+        }
+
+        .notification-item-icon.warning {
+            background: #fff3cd;
+        }
+
+        .notification-item-icon.error {
+            background: #f8d7da;
+        }
+
+        .notification-item-icon.success {
+            background: #d4edda;
+        }
+
+        .notification-item-title {
+            font-weight: 600;
+            font-size: 14px;
+            color: #1a1a1a;
+        }
+
+        .notification-item-time {
+            font-size: 12px;
+            color: #6c757d;
+            margin-left: auto;
+        }
+
+        .notification-item-body {
+            font-size: 13px;
+            color: #495057;
+            line-height: 1.5;
+        }
+
+        .notification-item-action {
+            margin-top: 12px;
+        }
+
+        .notification-item-action button {
+            background: #004D4D;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .notification-item-action button:hover {
+            background: #003838;
+        }
+
+        .notification-empty {
+            padding: 40px 20px;
+            text-align: center;
+            color: #6c757d;
+        }
+
+        .notification-empty-icon {
+            font-size: 48px;
+            margin-bottom: 12px;
+        }
+
+        /* ============ COOKIE MODAL ============ */
+        .cookie-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .cookie-modal.show {
+            display: flex;
+        }
+
+        .cookie-modal-content {
+            background: white;
+            border-radius: 16px;
+            width: 100%;
+            max-width: 520px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+
+        .cookie-modal-header {
+            padding: 24px;
+            border-bottom: 1px solid #e9ecef;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+
+        .cookie-modal-header h2 {
+            font-size: 20px;
+            font-weight: 600;
+            color: #1a1a1a;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .cookie-modal-close {
+            background: none;
+            border: none;
+            font-size: 24px;
+            color: #6c757d;
+            cursor: pointer;
+            padding: 4px;
+            line-height: 1;
+        }
+
+        .cookie-modal-close:hover {
+            color: #1a1a1a;
+        }
+
+        .cookie-modal-body {
+            padding: 24px;
+        }
+
+        .cookie-pending-list {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 20px;
+        }
+
+        .cookie-pending-list h4 {
+            font-size: 13px;
+            font-weight: 600;
+            color: #6c757d;
+            margin-bottom: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .cookie-pending-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 0;
+            font-size: 14px;
+            color: #495057;
+        }
+
+        .cookie-pending-item:not(:last-child) {
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .cookie-instructions {
+            background: #e7f3ff;
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 20px;
+        }
+
+        .cookie-instructions h4 {
+            font-size: 14px;
+            font-weight: 600;
+            color: #0066cc;
+            margin-bottom: 12px;
+        }
+
+        .cookie-instructions ol {
+            margin: 0;
+            padding-left: 20px;
+            font-size: 13px;
+            color: #495057;
+            line-height: 1.8;
+        }
+
+        .cookie-form-group {
+            margin-bottom: 20px;
+        }
+
+        .cookie-form-group label {
+            display: block;
+            font-size: 14px;
+            font-weight: 600;
+            color: #1a1a1a;
+            margin-bottom: 8px;
+        }
+
+        .cookie-form-group input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            font-size: 14px;
+            font-family: 'Monaco', 'Consolas', monospace;
+            transition: border-color 0.2s;
+        }
+
+        .cookie-form-group input:focus {
+            outline: none;
+            border-color: #004D4D;
+        }
+
+        .cookie-form-group input::placeholder {
+            color: #adb5bd;
+        }
+
+        .cookie-modal-footer {
+            padding: 16px 24px 24px;
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+        }
+
+        .cookie-modal-footer button {
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-cancel {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            color: #495057;
+        }
+
+        .btn-cancel:hover {
+            background: #e9ecef;
+        }
+
+        .btn-save-cookies {
+            background: #004D4D;
+            border: none;
+            color: white;
+        }
+
+        .btn-save-cookies:hover {
+            background: #003838;
+        }
+
+        .btn-save-cookies:disabled {
+            background: #adb5bd;
+            cursor: not-allowed;
+        }
+
+        /* ============ RESEARCH VIEW ============ */
+        .view {
+            display: none;
+            padding: 30px 40px;
+        }
+
+        .view.active {
+            display: block;
+        }
+
+        .research-view {
+            background: linear-gradient(135deg, #f8f9ff 0%, #f0f4ff 100%);
+            min-height: calc(100vh - 70px);
+        }
+
+        .research-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .research-header h1 {
+            font-size: 28px;
+            font-weight: 700;
+            color: #1a1a1a;
+            margin-bottom: 8px;
+        }
+
+        .research-header p {
+            font-size: 16px;
+            color: #6c757d;
+        }
+
+        .research-config {
+            background: white;
+            border-radius: 12px;
+            padding: 20px 24px;
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        }
+
+        .research-config label {
+            font-size: 14px;
+            font-weight: 600;
+            color: #495057;
+        }
+
+        .research-config select {
+            padding: 10px 16px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            font-size: 14px;
+            min-width: 180px;
+            cursor: pointer;
+        }
+
+        .research-config select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .webhook-status {
+            margin-left: auto;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+            color: #6c757d;
+        }
+
+        .webhook-status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #adb5bd;
+        }
+
+        .webhook-status-dot.connected {
+            background: #28a745;
+        }
+
+        .webhook-status-dot.error {
+            background: #dc3545;
+        }
+
+        .research-search-box {
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            margin-bottom: 24px;
+        }
+
+        .research-input-row {
+            display: flex;
+            gap: 16px;
+            align-items: flex-end;
+        }
+
+        .research-input-group {
+            flex: 1;
+        }
+
+        .research-input-group label {
+            display: block;
+            font-size: 14px;
+            font-weight: 600;
+            color: #495057;
+            margin-bottom: 8px;
+        }
+
+        .research-input-group input {
+            width: 100%;
+            padding: 14px 18px;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: all 0.2s;
+        }
+
+        .research-input-group input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+        }
+
+        .research-btn {
+            padding: 14px 28px;
+            border: none;
+            border-radius: 10px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .research-btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .research-btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        .research-btn-primary:disabled {
+            background: #adb5bd;
+            transform: none;
+            box-shadow: none;
+            cursor: not-allowed;
+        }
+
+        .research-btn-secondary {
+            background: white;
+            border: 2px solid #e9ecef;
+            color: #495057;
+        }
+
+        .research-btn-secondary:hover {
+            border-color: #667eea;
+            color: #667eea;
+        }
+
+        /* Research Results */
+        .research-results {
+            background: white;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        }
+
+        .research-results-header {
+            padding: 20px 24px;
+            border-bottom: 1px solid #e9ecef;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .research-results-header h3 {
+            font-size: 18px;
+            font-weight: 600;
+            color: #1a1a1a;
+        }
+
+        .research-results-actions {
+            display: flex;
+            gap: 12px;
+        }
+
+        .research-stage {
+            padding: 24px;
+        }
+
+        /* Stage 1: Disambiguation */
+        .disambiguation-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .disambiguation-card {
+            display: flex;
+            align-items: center;
+            padding: 16px 20px;
+            border: 2px solid #e9ecef;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .disambiguation-card:hover {
+            border-color: #667eea;
+            background: #f8f9ff;
+        }
+
+        .disambiguation-card.selected {
+            border-color: #667eea;
+            background: #f0f4ff;
+        }
+
+        .disambiguation-card-info {
+            flex: 1;
+        }
+
+        .disambiguation-card-name {
+            font-size: 16px;
+            font-weight: 600;
+            color: #1a1a1a;
+            margin-bottom: 4px;
+        }
+
+        .disambiguation-card-meta {
+            font-size: 13px;
+            color: #6c757d;
+        }
+
+        .disambiguation-card-radio {
+            width: 20px;
+            height: 20px;
+            border: 2px solid #dee2e6;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .disambiguation-card.selected .disambiguation-card-radio {
+            border-color: #667eea;
+            background: #667eea;
+        }
+
+        .disambiguation-card.selected .disambiguation-card-radio::after {
+            content: '';
+            width: 8px;
+            height: 8px;
+            background: white;
+            border-radius: 50%;
+        }
+
+        /* Stage 2: Prospects Found */
+        .prospect-results-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .prospect-result-item {
+            display: flex;
+            align-items: center;
+            padding: 14px 16px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            transition: all 0.2s;
+        }
+
+        .prospect-result-item:hover {
+            background: #f0f4ff;
+        }
+
+        .prospect-result-checkbox {
+            margin-right: 14px;
+        }
+
+        .prospect-result-checkbox input {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+
+        .prospect-result-info {
+            flex: 1;
+        }
+
+        .prospect-result-name {
+            font-size: 15px;
+            font-weight: 600;
+            color: #1a1a1a;
+            margin-bottom: 2px;
+        }
+
+        .prospect-result-title {
+            font-size: 13px;
+            color: #6c757d;
+        }
+
+        .prospect-result-linkedin {
+            color: #0077b5;
+            font-size: 13px;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .prospect-result-linkedin:hover {
+            text-decoration: underline;
+        }
+
+        .prospect-result-status {
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .prospect-result-status.has-linkedin {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .prospect-result-status.no-linkedin {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        /* Progress Indicator */
+        .research-progress {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 16px 24px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .research-progress-spinner {
+            width: 24px;
+            height: 24px;
+            border: 3px solid #e9ecef;
+            border-top-color: #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .research-progress-text {
+            font-size: 14px;
+            color: #495057;
+        }
+
+        /* Job Progress Bar */
+        .job-progress {
+            margin-top: 20px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 12px;
+        }
+
+        .job-progress-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .job-progress-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #1a1a1a;
+        }
+
+        .job-progress-percent {
+            font-size: 14px;
+            font-weight: 600;
+            color: #667eea;
+        }
+
+        .job-progress-bar {
+            height: 8px;
+            background: #e9ecef;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .job-progress-bar-fill {
+            height: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 4px;
+            transition: width 0.3s ease;
+        }
+
+        .job-progress-message {
+            margin-top: 8px;
+            font-size: 13px;
+            color: #6c757d;
+        }
+
+        /* Empty State */
+        .research-empty {
+            text-align: center;
+            padding: 60px 40px;
+            color: #6c757d;
+        }
+
+        .research-empty-icon {
+            font-size: 64px;
+            margin-bottom: 16px;
+        }
+
+        .research-empty h3 {
+            font-size: 18px;
+            font-weight: 600;
+            color: #495057;
+            margin-bottom: 8px;
+        }
+
+        .research-empty p {
+            font-size: 14px;
+        }
+
+        /* ============ LOADING ============ */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 77, 77, 0.95);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            flex-direction: column;
+            color: white;
+        }
+
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid rgba(255,255,255,0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+        }
+
+        .loading-text {
+            font-size: 18px;
+            font-weight: 500;
+        }
+
+        .loading-details {
+            font-size: 14px;
+            opacity: 0.8;
+            margin-top: 8px;
+        }
+
+        .loading-log {
+            margin-top: 20px;
+            max-height: 200px;
+            overflow-y: auto;
+            font-family: monospace;
+            font-size: 12px;
+            text-align: left;
+            padding: 15px;
+            background: rgba(0,0,0,0.2);
+            border-radius: 8px;
+            width: 90%;
+            max-width: 600px;
+        }
+
+        .log-entry { padding: 2px 0; }
+        .log-success { color: #90EE90; }
+        .log-error { color: #ff6b6b; }
+        .log-warning { color: #ffd93d; }
+        .log-info { color: #a8dadc; }
+
+        /* ============ FILTER ROW ============ */
+        .filter-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 15px;
+            padding: 20px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            margin-bottom: 20px;
+        }
+
+        .filter-group label {
+            display: block;
+            font-size: 12px;
+            font-weight: 600;
+            color: #6c757d;
+            margin-bottom: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .filter-group input,
+        .filter-group select {
+            width: 100%;
+            padding: 10px 12px;
+            border: 2px solid #dee2e6;
+            border-radius: 6px;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+
+        .filter-group input:focus,
+        .filter-group select:focus {
+            outline: none;
+            border-color: #004D4D;
+            box-shadow: 0 0 0 3px rgba(0, 77, 77, 0.1);
+        }
+
+        /* ============ STATS ============ */
+        .stats {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            padding: 15px 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .stat-item {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .stat-value {
+            font-size: 24px;
+            font-weight: 700;
+            color: #004D4D;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: #6c757d;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* ============ TABLES ============ */
+        .table-container {
+            overflow-x: auto;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+
+        th {
+            background: #f8f9fa;
+            padding: 14px 16px;
+            text-align: left;
+            font-weight: 600;
+            color: #495057;
+            border-bottom: 2px solid #dee2e6;
+            white-space: nowrap;
+        }
+
+        td {
+            padding: 14px 16px;
+            border-bottom: 1px solid #f1f3f4;
+            color: #495057;
+        }
+
+        tbody tr:hover {
+            background: #f8f9fa;
+            cursor: pointer;
+        }
+
+        .sortable {
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .sortable:hover {
+            background: #e9ecef;
+        }
+
+        /* ============ BADGE ============ */
+        .badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .badge-sfo { background: #e7f3ff; color: #0066cc; }
+        .badge-mfo { background: #fff3cd; color: #856404; }
+        .badge-foundation { background: #d4edda; color: #155724; }
+        .badge-endowment { background: #f8d7da; color: #721c24; }
+        .badge-warm { background: #d4edda; color: #155724; }
+        .badge-cold { background: #e9ecef; color: #6c757d; }
+
+        /* ============ INFO TIP ============ */
+        .info-tip {
+            background: #e7f3ff;
+            border-left: 4px solid #0066cc;
+            padding: 12px 16px;
+            border-radius: 0 8px 8px 0;
+            margin-bottom: 20px;
+            font-size: 14px;
+            color: #004085;
+        }
+
+        /* ============ MODAL ============ */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            overflow-y: auto;
+            padding: 20px;
+        }
+
+        .modal.show {
+            display: block;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 16px;
+            max-width: 800px;
+            margin: 40px auto;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+
+        .modal-header {
+            padding: 24px;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .modal-header h2 {
+            font-size: 22px;
+            font-weight: 700;
+            color: #1a1a1a;
+        }
+
+        .close-btn {
+            position: absolute;
+            right: 24px;
+            top: 24px;
+            font-size: 28px;
+            color: #6c757d;
+            cursor: pointer;
+            line-height: 1;
+        }
+
+        .close-btn:hover {
+            color: #1a1a1a;
+        }
+
+        .modal-body {
+            padding: 24px;
+        }
+
+        /* ============ FOOTER ============ */
+        .app-footer {
+            padding: 16px 40px;
+            background: #f8f9fa;
+            border-top: 1px solid #e9ecef;
+            font-size: 13px;
+            color: #6c757d;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .footer-divider {
+            color: #dee2e6;
+        }
+
+        .footer-highlight {
+            font-weight: 600;
+            color: #004D4D;
+        }
+
+        /* ============ RESPONSIVE ============ */
+        @media (max-width: 768px) {
+            .header {
+                flex-direction: column;
+                gap: 16px;
+                padding: 16px 20px;
+            }
+
+            .header-right {
+                width: 100%;
+                justify-content: space-between;
+            }
+
+            .tabs {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+
+            .view {
+                padding: 20px;
+            }
+
+            .filter-row {
+                grid-template-columns: 1fr;
+            }
+
+            .research-input-row {
+                flex-direction: column;
+            }
+
+            .research-config {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .webhook-status {
+                margin-left: 0;
+            }
+
+            .notification-dropdown {
+                width: 320px;
+                right: -100px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- LOADING OVERLAY -->
+    <div class="loading-overlay" id="loading-overlay">
+        <div class="loading-spinner"></div>
+        <div class="loading-text">🔄 Loading FourBridge Data...</div>
+        <div class="loading-details">Fetching firms, prospects, connections, and team data...</div>
+        <div class="loading-log" id="loading-log"></div>
+    </div>
+
+    <div class="container">
+        <div class="header">
+            <div class="header-logo">
+                <span class="header-logo-text">🌉 FourBridge</span>
+            </div>
+            <div class="header-right">
+                <div class="tabs">
+                    <button class="tab active" onclick="switchView('prospects')">Prospects</button>
+                    <button class="tab" onclick="switchView('connections')">Connections</button>
+                    <button class="tab" onclick="switchView('firms')">Firms</button>
+                    <button class="tab" onclick="switchView('team')">Team</button>
+                    <button class="tab research-tab" onclick="switchView('research')">🔬 Research</button>
+                </div>
+                
+                <!-- NOTIFICATION BELL -->
+                <div class="notification-bell" onclick="toggleNotifications(event)">
+                    <svg viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.63-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.64 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2zm-2 1H8v-6c0-2.48 1.51-4.5 4-4.5s4 2.02 4 4.5v6z"/>
+                    </svg>
+                    <span class="notification-badge hidden" id="notification-badge">0</span>
+                    
+                    <!-- Notification Dropdown -->
+                    <div class="notification-dropdown" id="notification-dropdown">
+                        <div class="notification-dropdown-header">
+                            <h3>🔔 Notifications</h3>
+                            <button onclick="clearAllNotifications(event)">Clear All</button>
+                        </div>
+                        <div class="notification-list" id="notification-list">
+                            <div class="notification-empty">
+                                <div class="notification-empty-icon">🔔</div>
+                                <p>No notifications</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- PROSPECTS VIEW -->
+        <div id="prospects-view" class="view active">
+            <div class="info-tip">
+                💡 <strong>Prospects View:</strong> Target people and firms we want to reach. Use filters to narrow down your search.
+            </div>
+            <div class="filter-row">
+                <div class="filter-group">
+                    <label>Search</label>
+                    <input type="text" id="prospects-search" placeholder="Search names, firms...">
+                </div>
+                <div class="filter-group">
+                    <label>Type</label>
+                    <select id="prospects-type">
+                        <option value="">All Types</option>
+                        <option value="SFO">SFO</option>
+                        <option value="MFO">MFO</option>
+                        <option value="Foundation">Foundation</option>
+                        <option value="Endowment">Endowment</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label>Connection</label>
+                    <select id="prospects-connection">
+                        <option value="">All</option>
+                        <option value="yes">With Warm Paths</option>
+                        <option value="no">No Connections</option>
+                    </select>
+                </div>
+            </div>
+            <div class="stats" id="prospects-stats">
+                <div class="stat-item">
+                    <span class="stat-value" id="stat-total">0</span>
+                    <span class="stat-label">Total Prospects</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-value" id="stat-warm">0</span>
+                    <span class="stat-label">With Warm Paths</span>
+                </div>
+            </div>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th class="sortable">Name</th>
+                            <th class="sortable">Title</th>
+                            <th class="sortable">Firm</th>
+                            <th class="sortable">Type</th>
+                            <th class="sortable">Warm Paths</th>
+                        </tr>
+                    </thead>
+                    <tbody id="prospects-table-body">
+                        <tr><td colspan="5" style="text-align: center; padding: 40px; color: #6c757d;">Loading prospects...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- CONNECTIONS VIEW -->
+        <div id="connections-view" class="view">
+            <div class="info-tip">
+                💡 <strong>Connections View:</strong> Browse mutual connections who can make introductions.
+            </div>
+            <div class="filter-row">
+                <div class="filter-group">
+                    <label>Search</label>
+                    <input type="text" id="connections-search" placeholder="Search connectors...">
+                </div>
+                <div class="filter-group">
+                    <label>Team Member</label>
+                    <select id="connections-team">
+                        <option value="">All Team</option>
+                    </select>
+                </div>
+            </div>
+            <div class="stats" id="connections-stats">
+                <div class="stat-item">
+                    <span class="stat-value" id="stat-connectors">0</span>
+                    <span class="stat-label">Connectors</span>
+                </div>
+            </div>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th class="sortable">Connector</th>
+                            <th class="sortable">Title</th>
+                            <th class="sortable">Company</th>
+                            <th class="sortable">Knows Team</th>
+                            <th class="sortable">Can Reach</th>
+                        </tr>
+                    </thead>
+                    <tbody id="connections-table-body">
+                        <tr><td colspan="5" style="text-align: center; padding: 40px; color: #6c757d;">Loading connections...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- FIRMS VIEW -->
+        <div id="firms-view" class="view">
+            <div class="info-tip">
+                💡 <strong>Firms View:</strong> Complete directory of target firms.
+            </div>
+            <div class="filter-row">
+                <div class="filter-group">
+                    <label>Search</label>
+                    <input type="text" id="firms-search" placeholder="Search firms...">
+                </div>
+                <div class="filter-group">
+                    <label>Type</label>
+                    <select id="firms-type">
+                        <option value="">All Types</option>
+                        <option value="SFO">SFO</option>
+                        <option value="MFO">MFO</option>
+                        <option value="Foundation">Foundation</option>
+                        <option value="Endowment">Endowment</option>
+                    </select>
+                </div>
+            </div>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th class="sortable">Firm Name</th>
+                            <th class="sortable">Type</th>
+                            <th class="sortable">Location</th>
+                            <th class="sortable">AUM</th>
+                            <th class="sortable">Contacts</th>
+                        </tr>
+                    </thead>
+                    <tbody id="firms-table-body">
+                        <tr><td colspan="5" style="text-align: center; padding: 40px; color: #6c757d;">Loading firms...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- TEAM VIEW -->
+        <div id="team-view" class="view">
+            <div class="info-tip">
+                💡 <strong>Team View:</strong> FourBridge team members and their network reach.
+            </div>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Role</th>
+                            <th>Connectors</th>
+                            <th>Firms Reachable</th>
+                        </tr>
+                    </thead>
+                    <tbody id="team-table-body">
+                        <tr><td colspan="4" style="text-align: center; padding: 40px; color: #6c757d;">Loading team...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- RESEARCH VIEW -->
+        <div id="research-view" class="view research-view">
+            <div class="research-header">
+                <h1>🔬 Research Assistant</h1>
+                <p>Find and add new prospects to your database</p>
+            </div>
+
+            <!-- Config Bar -->
+            <div class="research-config">
+                <label>Scan as:</label>
+                <select id="research-team-member">
+                    <option value="">Select team member...</option>
+                    <option value="Ted Clark">Ted Clark</option>
+                    <option value="Jon Terbell">Jon Terbell</option>
+                    <option value="Chris Gilman">Chris Gilman</option>
+                    <option value="TJ Agnihotri">TJ Agnihotri</option>
+                </select>
+                <div class="webhook-status">
+                    <span class="webhook-status-dot" id="webhook-status-dot"></span>
+                    <span id="webhook-status-text">Checking connection...</span>
+                </div>
+            </div>
+
+            <!-- Search Box -->
+            <div class="research-search-box">
+                <div class="research-input-row">
+                    <div class="research-input-group">
+                        <label>Organization Name</label>
+                        <input type="text" id="research-org-input" placeholder="e.g., Rockefeller Foundation, Ziff Capital">
+                    </div>
+                    <button class="research-btn research-btn-primary" id="research-search-btn" onclick="startResearch()">
+                        🔍 Search
+                    </button>
+                </div>
+            </div>
+
+            <!-- Results Area -->
+            <div class="research-results" id="research-results" style="display: none;">
+                <div class="research-results-header">
+                    <h3 id="research-results-title">Search Results</h3>
+                    <div class="research-results-actions" id="research-results-actions"></div>
+                </div>
+                <div class="research-stage" id="research-stage">
+                    <!-- Dynamic content goes here -->
+                </div>
+            </div>
+
+            <!-- Job Progress (shown during scanning) -->
+            <div class="job-progress" id="job-progress" style="display: none;">
+                <div class="job-progress-header">
+                    <span class="job-progress-title">Scanning LinkedIn profiles...</span>
+                    <span class="job-progress-percent" id="job-progress-percent">0%</span>
+                </div>
+                <div class="job-progress-bar">
+                    <div class="job-progress-bar-fill" id="job-progress-fill" style="width: 0%"></div>
+                </div>
+                <div class="job-progress-message" id="job-progress-message">Starting...</div>
+            </div>
+
+            <!-- Empty State -->
+            <div class="research-empty" id="research-empty">
+                <div class="research-empty-icon">🔍</div>
+                <h3>Search for an organization</h3>
+                <p>Enter a firm name above to find prospects and add them to your database</p>
+            </div>
+        </div>
+
+        <!-- FOOTER -->
+        <div class="app-footer">
+            <span>🔄 Last synced: <span id="footer-sync-time">just now</span></span>
+            <span class="footer-divider">•</span>
+            <span>v2025-12-06</span>
+        </div>
+    </div>
+
+    <!-- COOKIE MODAL -->
+    <div class="cookie-modal" id="cookie-modal">
+        <div class="cookie-modal-content">
+            <div class="cookie-modal-header">
+                <h2>🔑 Update LinkedIn Cookies</h2>
+                <button class="cookie-modal-close" onclick="closeCookieModal()">&times;</button>
+            </div>
+            <div class="cookie-modal-body">
+                <div class="cookie-pending-list" id="cookie-pending-list" style="display: none;">
+                    <h4>Pending Prospects</h4>
+                    <div id="cookie-pending-items"></div>
+                </div>
+
+                <div class="cookie-instructions">
+                    <h4>How to get your LinkedIn cookies:</h4>
+                    <ol>
+                        <li>Open LinkedIn in Chrome (logged in as <strong id="cookie-team-member-name">team member</strong>)</li>
+                        <li>Press <strong>F12</strong> to open Developer Tools</li>
+                        <li>Go to <strong>Application</strong> → <strong>Cookies</strong> → <strong>linkedin.com</strong></li>
+                        <li>Find and copy the values for <strong>li_at</strong> and <strong>JSESSIONID</strong></li>
+                    </ol>
+                </div>
+
+                <div class="cookie-form-group">
+                    <label>li_at cookie</label>
+                    <input type="text" id="cookie-li-at" placeholder="Paste li_at value here...">
+                </div>
+
+                <div class="cookie-form-group">
+                    <label>JSESSIONID cookie</label>
+                    <input type="text" id="cookie-jsessionid" placeholder="Paste JSESSIONID value here...">
+                </div>
+            </div>
+            <div class="cookie-modal-footer">
+                <button class="btn-cancel" onclick="closeCookieModal()">Cancel</button>
+                <button class="btn-save-cookies" id="btn-save-cookies" onclick="saveCookiesAndResume()">
+                    Save & Resume Scanning
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- DETAIL MODAL -->
+    <div id="detail-modal" class="modal" onclick="closeModal(event)">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <span class="close-btn" onclick="closeModal()">&times;</span>
+            <div class="modal-header">
+                <h2 id="modal-name"></h2>
+            </div>
+            <div class="modal-body" id="modal-body"></div>
+        </div>
+    </div>
+
+    <script>
+        // ========== CONFIGURATION ==========
+        const WEBHOOK_URL = ''; // <- PASTE YOUR APPS SCRIPT WEB APP URL HERE
+        
+        const SHEET_ID = '183HM7pUH-gdd4FXm94G05Bm0KJrfHioDU2Ti1GQiOWo';
+        const PUBLISHED_ID = '2PACX-1vQa6QC3ZJ9qU8KoypqBCBMsf68a8W7257eyTyk6nCIx4aRc54MPxtqwDBjjiDQxlhF5Y85_XT2ND-CK';
+        
+        const SHEET_TABS = {
+            firms: { name: 'firms', gid: 0 },
+            team: { name: 'team', gid: 835603482 },
+            mutualConnections: { name: 'mutual connections', gid: 519427041 },
+            prospects: { name: 'prospects', gid: 857156726 }
+        };
+
+        // ========== GLOBAL STATE ==========
+        let toolData = {
+            firms: [],
+            prospects: [],
+            teamMembers: [],
+            mutualConnections: [],
+            relationships: []
+        };
+
+        let currentView = 'prospects';
+        let notifications = [];
+        let currentJobId = null;
+        let currentNotificationId = null;
+        let jobPollInterval = null;
+
+        // ========== LOGGING ==========
+        function log(message, type = 'info') {
+            const logDiv = document.getElementById('loading-log');
+            if (logDiv) {
+                const entry = document.createElement('div');
+                entry.className = `log-entry log-${type}`;
+                entry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+                logDiv.appendChild(entry);
+                logDiv.scrollTop = logDiv.scrollHeight;
+            }
+            console.log(`[${type.toUpperCase()}] ${message}`);
+        }
+
+        // ========== VIEW SWITCHING ==========
+        function switchView(viewName) {
+            currentView = viewName;
+            
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+                if (tab.textContent.toLowerCase().includes(viewName) || 
+                    (viewName === 'research' && tab.textContent.includes('Research'))) {
+                    tab.classList.add('active');
+                }
+            });
+
+            document.querySelectorAll('.view').forEach(view => {
+                view.classList.remove('active');
+            });
+            
+            const viewElement = document.getElementById(`${viewName}-view`);
+            if (viewElement) {
+                viewElement.classList.add('active');
+            }
+
+            // Initialize research view
+            if (viewName === 'research') {
+                checkWebhookConnection();
+            }
+        }
+
+        // ========== NOTIFICATION SYSTEM ==========
+        function toggleNotifications(event) {
+            event.stopPropagation();
+            const dropdown = document.getElementById('notification-dropdown');
+            dropdown.classList.toggle('show');
+        }
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', (e) => {
+            const dropdown = document.getElementById('notification-dropdown');
+            const bell = document.querySelector('.notification-bell');
+            if (!bell.contains(e.target)) {
+                dropdown.classList.remove('show');
+            }
+        });
+
+        function updateNotificationBadge() {
+            const badge = document.getElementById('notification-badge');
+            const count = notifications.filter(n => !n.dismissed).length;
+            badge.textContent = count;
+            badge.classList.toggle('hidden', count === 0);
+        }
+
+        function renderNotifications() {
+            const list = document.getElementById('notification-list');
+            const activeNotifications = notifications.filter(n => !n.dismissed);
+
+            if (activeNotifications.length === 0) {
+                list.innerHTML = `
+                    <div class="notification-empty">
+                        <div class="notification-empty-icon">🔔</div>
+                        <p>No notifications</p>
+                    </div>
+                `;
+                return;
+            }
+
+            list.innerHTML = activeNotifications.map(notif => {
+                const timeAgo = getTimeAgo(notif.createdAt);
+                const icon = notif.type === 'cookies_expired' ? '⚠️' : '🔔';
+                const iconClass = notif.type === 'cookies_expired' ? 'warning' : 'info';
+                
+                return `
+                    <div class="notification-item" onclick="handleNotificationClick('${notif.id}')">
+                        <div class="notification-item-header">
+                            <div class="notification-item-icon ${iconClass}">${icon}</div>
+                            <span class="notification-item-title">${notif.teamMember}'s Cookies</span>
+                            <span class="notification-item-time">${timeAgo}</span>
+                        </div>
+                        <div class="notification-item-body">
+                            ${notif.message || 'Cookies need to be updated'}
+                            ${notif.pendingProspects ? `<br><strong>${notif.pendingProspects.length} prospects</strong> waiting to scan` : ''}
+                        </div>
+                        <div class="notification-item-action">
+                            <button onclick="event.stopPropagation(); openCookieModal('${notif.id}', '${notif.teamMember}')">
+                                Update Cookies & Resume
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function getTimeAgo(dateString) {
+            const date = new Date(dateString);
+            const now = new Date();
+            const seconds = Math.floor((now - date) / 1000);
+            
+            if (seconds < 60) return 'Just now';
+            if (seconds < 3600) return `${Math.floor(seconds / 60)}m ago`;
+            if (seconds < 86400) return `${Math.floor(seconds / 3600)}h ago`;
+            return `${Math.floor(seconds / 86400)}d ago`;
+        }
+
+        function handleNotificationClick(notificationId) {
+            const notif = notifications.find(n => n.id === notificationId);
+            if (notif) {
+                openCookieModal(notificationId, notif.teamMember);
+            }
+        }
+
+        async function fetchNotifications() {
+            if (!WEBHOOK_URL) return;
+            
+            try {
+                const response = await fetch(`${WEBHOOK_URL}?action=notifications`);
+                const data = await response.json();
+                if (data.notifications) {
+                    notifications = data.notifications;
+                    updateNotificationBadge();
+                    renderNotifications();
+                }
+            } catch (error) {
+                console.error('Error fetching notifications:', error);
+            }
+        }
+
+        async function clearAllNotifications(event) {
+            if (event) event.stopPropagation();
+            if (!WEBHOOK_URL) return;
+            
+            try {
+                await fetch(WEBHOOK_URL, {
+                    method: 'POST',
+                    body: JSON.stringify({ action: 'clear_notifications' })
+                });
+                notifications = [];
+                updateNotificationBadge();
+                renderNotifications();
+            } catch (error) {
+                console.error('Error clearing notifications:', error);
+            }
+        }
+
+        // ========== COOKIE MODAL ==========
+        function openCookieModal(notificationId, teamMember) {
+            currentNotificationId = notificationId;
+            
+            // Find the notification
+            const notif = notifications.find(n => n.id === notificationId);
+            
+            // Update modal content
+            document.getElementById('cookie-team-member-name').textContent = teamMember;
+            
+            // Show pending prospects if available
+            const pendingList = document.getElementById('cookie-pending-list');
+            const pendingItems = document.getElementById('cookie-pending-items');
+            
+            if (notif && notif.pendingProspects && notif.pendingProspects.length > 0) {
+                pendingList.style.display = 'block';
+                pendingItems.innerHTML = notif.pendingProspects.slice(0, 5).map(p => `
+                    <div class="cookie-pending-item">
+                        <span>👤</span>
+                        <span>${p.name || p}</span>
+                        ${p.title ? `<span style="color: #6c757d; font-size: 12px;">(${p.title})</span>` : ''}
+                    </div>
+                `).join('') + (notif.pendingProspects.length > 5 ? 
+                    `<div class="cookie-pending-item" style="color: #6c757d;">...and ${notif.pendingProspects.length - 5} more</div>` : '');
+            } else {
+                pendingList.style.display = 'none';
+            }
+            
+            // Clear inputs
+            document.getElementById('cookie-li-at').value = '';
+            document.getElementById('cookie-jsessionid').value = '';
+            
+            // Update button text
+            const btn = document.getElementById('btn-save-cookies');
+            btn.textContent = notif ? 'Save & Resume Scanning' : 'Save Cookies';
+            
+            // Store team member for save
+            document.getElementById('cookie-modal').dataset.teamMember = teamMember;
+            
+            // Show modal
+            document.getElementById('cookie-modal').classList.add('show');
+            
+            // Close notification dropdown
+            document.getElementById('notification-dropdown').classList.remove('show');
+        }
+
+        function closeCookieModal() {
+            document.getElementById('cookie-modal').classList.remove('show');
+            currentNotificationId = null;
+        }
+
+        async function saveCookiesAndResume() {
+            const teamMember = document.getElementById('cookie-modal').dataset.teamMember;
+            const liAt = document.getElementById('cookie-li-at').value.trim();
+            const jsessionid = document.getElementById('cookie-jsessionid').value.trim();
+            
+            if (!liAt || !jsessionid) {
+                alert('Please enter both cookie values');
+                return;
+            }
+            
+            const btn = document.getElementById('btn-save-cookies');
+            btn.disabled = true;
+            btn.textContent = 'Saving...';
+            
+            try {
+                // Save cookies
+                const saveResponse = await fetch(WEBHOOK_URL, {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        action: 'update_cookies',
+                        teamMember: teamMember,
+                        li_at: liAt,
+                        jsessionid: jsessionid
+                    })
+                });
+                
+                const saveResult = await saveResponse.json();
+                
+                if (saveResult.error) {
+                    alert('Error saving cookies: ' + saveResult.error);
+                    btn.disabled = false;
+                    btn.textContent = 'Save & Resume Scanning';
+                    return;
+                }
+                
+                // If there's a notification to resume
+                if (currentNotificationId) {
+                    const resumeResponse = await fetch(WEBHOOK_URL, {
+                        method: 'POST',
+                        body: JSON.stringify({
+                            action: 'resume_scan',
+                            notificationId: currentNotificationId,
+                            teamMember: teamMember
+                        })
+                    });
+                    
+                    const resumeResult = await resumeResponse.json();
+                    
+                    if (resumeResult.job_id) {
+                        currentJobId = resumeResult.job_id;
+                        startJobPolling();
+                    }
+                }
+                
+                // Refresh notifications
+                await fetchNotifications();
+                
+                closeCookieModal();
+                
+                alert('Cookies saved successfully!' + (currentNotificationId ? ' Scanning resumed.' : ''));
+                
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error saving cookies: ' + error.message);
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Save & Resume Scanning';
+            }
+        }
+
+        // ========== WEBHOOK CONNECTION ==========
+        async function checkWebhookConnection() {
+            const dot = document.getElementById('webhook-status-dot');
+            const text = document.getElementById('webhook-status-text');
+            
+            if (!WEBHOOK_URL) {
+                dot.className = 'webhook-status-dot error';
+                text.textContent = 'Webhook URL not configured';
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${WEBHOOK_URL}?action=ping`);
+                const data = await response.json();
+                
+                if (data.status === 'ok') {
+                    dot.className = 'webhook-status-dot connected';
+                    text.textContent = 'Connected to Google Sheets';
+                } else {
+                    dot.className = 'webhook-status-dot error';
+                    text.textContent = 'Connection error';
+                }
+            } catch (error) {
+                dot.className = 'webhook-status-dot error';
+                text.textContent = 'Cannot connect';
+            }
+        }
+
+        // ========== RESEARCH FUNCTIONS ==========
+        let researchState = {
+            stage: 'idle', // idle, disambiguation, results
+            searchTerm: '',
+            selectedOrg: null,
+            foundProspects: []
+        };
+
+        async function startResearch() {
+            const input = document.getElementById('research-org-input');
+            const searchTerm = input.value.trim();
+            
+            if (!searchTerm) {
+                alert('Please enter an organization name');
+                return;
+            }
+            
+            const teamMember = document.getElementById('research-team-member').value;
+            if (!teamMember) {
+                alert('Please select a team member to scan as');
+                return;
+            }
+            
+            researchState.searchTerm = searchTerm;
+            researchState.stage = 'searching';
+            
+            // Show loading
+            document.getElementById('research-empty').style.display = 'none';
+            document.getElementById('research-results').style.display = 'block';
+            document.getElementById('research-results-title').textContent = 'Searching...';
+            document.getElementById('research-stage').innerHTML = `
+                <div class="research-progress">
+                    <div class="research-progress-spinner"></div>
+                    <span class="research-progress-text">Searching for "${searchTerm}"...</span>
+                </div>
+            `;
+            
+            // Simulate search (in real implementation, this would use web_search API)
+            setTimeout(() => {
+                showDisambiguation(searchTerm);
+            }, 1500);
+        }
+
+        function showDisambiguation(searchTerm) {
+            researchState.stage = 'disambiguation';
+            
+            // Mock disambiguation results
+            const mockResults = [
+                { name: searchTerm, type: 'SFO', location: 'New York, NY', description: 'Single Family Office' },
+                { name: searchTerm + ' Partners', type: 'MFO', location: 'Boston, MA', description: 'Multi-Family Office' },
+                { name: searchTerm + ' Foundation', type: 'Foundation', location: 'Chicago, IL', description: 'Private Foundation' }
+            ];
+            
+            document.getElementById('research-results-title').textContent = 'Select Organization';
+            document.getElementById('research-results-actions').innerHTML = '';
+            
+            document.getElementById('research-stage').innerHTML = `
+                <p style="margin-bottom: 16px; color: #6c757d;">We found multiple matches. Please select the correct one:</p>
+                <div class="disambiguation-list">
+                    ${mockResults.map((org, i) => `
+                        <div class="disambiguation-card" onclick="selectOrganization(${i}, this)">
+                            <div class="disambiguation-card-info">
+                                <div class="disambiguation-card-name">${org.name}</div>
+                                <div class="disambiguation-card-meta">${org.type} • ${org.location} • ${org.description}</div>
+                            </div>
+                            <div class="disambiguation-card-radio"></div>
+                        </div>
+                    `).join('')}
+                </div>
+                <div style="margin-top: 20px; text-align: right;">
+                    <button class="research-btn research-btn-secondary" onclick="cancelResearch()" style="margin-right: 12px;">Cancel</button>
+                    <button class="research-btn research-btn-primary" id="continue-research-btn" disabled onclick="continueResearch()">Continue</button>
+                </div>
+            `;
+            
+            // Store mock results
+            researchState.mockResults = mockResults;
+        }
+
+        function selectOrganization(index, element) {
+            // Remove selection from all
+            document.querySelectorAll('.disambiguation-card').forEach(card => {
+                card.classList.remove('selected');
+            });
+            
+            // Add selection to clicked
+            element.classList.add('selected');
+            researchState.selectedOrg = researchState.mockResults[index];
+            
+            // Enable continue button
+            document.getElementById('continue-research-btn').disabled = false;
+        }
+
+        function continueResearch() {
+            if (!researchState.selectedOrg) return;
+            
+            researchState.stage = 'searching_prospects';
+            
+            document.getElementById('research-results-title').textContent = 'Finding Prospects...';
+            document.getElementById('research-stage').innerHTML = `
+                <div class="research-progress">
+                    <div class="research-progress-spinner"></div>
+                    <span class="research-progress-text">Searching LinkedIn for team members at ${researchState.selectedOrg.name}...</span>
+                </div>
+            `;
+            
+            // Simulate finding prospects
+            setTimeout(() => {
+                showProspectResults();
+            }, 2000);
+        }
+
+        function showProspectResults() {
+            researchState.stage = 'results';
+            
+            // Mock prospect results
+            const mockProspects = [
+                { name: 'John Smith', title: 'Chief Investment Officer', linkedin: 'https://linkedin.com/in/johnsmith', hasLinkedIn: true },
+                { name: 'Jane Doe', title: 'Managing Director', linkedin: 'https://linkedin.com/in/janedoe', hasLinkedIn: true },
+                { name: 'Bob Wilson', title: 'Partner', linkedin: 'https://linkedin.com/in/bobwilson', hasLinkedIn: true },
+                { name: 'Alice Chen', title: 'Principal', linkedin: '', hasLinkedIn: false },
+                { name: 'Tom Brown', title: 'Senior Associate', linkedin: 'https://linkedin.com/in/tombrown', hasLinkedIn: true }
+            ];
+            
+            researchState.foundProspects = mockProspects;
+            
+            document.getElementById('research-results-title').textContent = `Found ${mockProspects.length} Prospects`;
+            document.getElementById('research-results-actions').innerHTML = `
+                <button class="research-btn research-btn-secondary" onclick="cancelResearch()">Cancel</button>
+                <button class="research-btn research-btn-primary" onclick="addAndScanProspects()">Add & Scan Selected</button>
+            `;
+            
+            document.getElementById('research-stage').innerHTML = `
+                <div style="margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center;">
+                    <span style="color: #6c757d;">Select prospects to add to your database:</span>
+                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                        <input type="checkbox" id="select-all-prospects" onchange="toggleAllProspects(this.checked)">
+                        <span style="font-size: 13px;">Select All</span>
+                    </label>
+                </div>
+                <div class="prospect-results-list">
+                    ${mockProspects.map((p, i) => `
+                        <div class="prospect-result-item">
+                            <div class="prospect-result-checkbox">
+                                <input type="checkbox" id="prospect-${i}" ${p.hasLinkedIn ? 'checked' : ''} data-index="${i}">
+                            </div>
+                            <div class="prospect-result-info">
+                                <div class="prospect-result-name">${p.name}</div>
+                                <div class="prospect-result-title">${p.title}</div>
+                            </div>
+                            ${p.hasLinkedIn ? `
+                                <a href="${p.linkedin}" target="_blank" class="prospect-result-linkedin" onclick="event.stopPropagation()">
+                                    🔗 LinkedIn
+                                </a>
+                            ` : ''}
+                            <span class="prospect-result-status ${p.hasLinkedIn ? 'has-linkedin' : 'no-linkedin'}">
+                                ${p.hasLinkedIn ? '✓ LinkedIn' : 'No LinkedIn'}
+                            </span>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        }
+
+        function toggleAllProspects(checked) {
+            document.querySelectorAll('.prospect-result-checkbox input').forEach(cb => {
+                cb.checked = checked;
+            });
+        }
+
+        async function addAndScanProspects() {
+            const teamMember = document.getElementById('research-team-member').value;
+            
+            // Get selected prospects
+            const selected = [];
+            document.querySelectorAll('.prospect-result-checkbox input:checked').forEach(cb => {
+                const index = parseInt(cb.dataset.index);
+                selected.push(researchState.foundProspects[index]);
+            });
+            
+            if (selected.length === 0) {
+                alert('Please select at least one prospect');
+                return;
+            }
+            
+            if (!WEBHOOK_URL) {
+                alert('Webhook URL not configured. Please add your Apps Script URL.');
+                return;
+            }
+            
+            // Prepare data
+            const firmData = {
+                name: researchState.selectedOrg.name,
+                type: researchState.selectedOrg.type,
+                location: researchState.selectedOrg.location,
+                description: researchState.selectedOrg.description,
+                prospects: selected.map(p => p.name)
+            };
+            
+            const prospectsData = selected.map(p => ({
+                name: p.name,
+                title: p.title,
+                firm: researchState.selectedOrg.name,
+                linkedin: p.linkedin || ''
+            }));
+            
+            // Show progress
+            document.getElementById('research-results').style.display = 'none';
+            document.getElementById('job-progress').style.display = 'block';
+            document.getElementById('job-progress-percent').textContent = '0%';
+            document.getElementById('job-progress-fill').style.width = '0%';
+            document.getElementById('job-progress-message').textContent = 'Adding to database...';
+            
+            try {
+                const response = await fetch(WEBHOOK_URL, {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        action: 'add_and_scan',
+                        teamMember: teamMember,
+                        firms: [firmData],
+                        prospects: prospectsData
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.error) {
+                    alert('Error: ' + result.error);
+                    document.getElementById('job-progress').style.display = 'none';
+                    document.getElementById('research-results').style.display = 'block';
+                    return;
+                }
+                
+                if (result.status === 'needs_cookies') {
+                    // Show cookie modal
+                    document.getElementById('job-progress').style.display = 'none';
+                    await fetchNotifications();
+                    openCookieModal(result.notificationId, teamMember);
+                    return;
+                }
+                
+                if (result.job_id) {
+                    currentJobId = result.job_id;
+                    document.getElementById('job-progress-message').textContent = 
+                        `Added ${result.firmsAdded} firm and ${result.prospectsAdded} prospects. Starting scan...`;
+                    startJobPolling();
+                }
+                
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error adding prospects: ' + error.message);
+                document.getElementById('job-progress').style.display = 'none';
+                document.getElementById('research-results').style.display = 'block';
+            }
+        }
+
+        function startJobPolling() {
+            if (jobPollInterval) clearInterval(jobPollInterval);
+            
+            jobPollInterval = setInterval(async () => {
+                if (!currentJobId) {
+                    clearInterval(jobPollInterval);
+                    return;
+                }
+                
+                try {
+                    const response = await fetch(`${WEBHOOK_URL}?action=job_status&job_id=${currentJobId}`);
+                    const data = await response.json();
+                    
+                    // Update progress UI
+                    document.getElementById('job-progress-percent').textContent = `${data.progress || 0}%`;
+                    document.getElementById('job-progress-fill').style.width = `${data.progress || 0}%`;
+                    document.getElementById('job-progress-message').textContent = data.message || 'Processing...';
+                    
+                    if (data.status === 'complete') {
+                        clearInterval(jobPollInterval);
+                        currentJobId = null;
+                        
+                        document.getElementById('job-progress-message').textContent = 
+                            '✅ Complete! Refresh the page to see new data.';
+                        
+                        setTimeout(() => {
+                            document.getElementById('job-progress').style.display = 'none';
+                            resetResearch();
+                            alert('Scanning complete! Refresh the page to see your new prospects.');
+                        }, 2000);
+                    }
+                    
+                    if (data.status === 'paused') {
+                        clearInterval(jobPollInterval);
+                        currentJobId = null;
+                        
+                        document.getElementById('job-progress').style.display = 'none';
+                        await fetchNotifications();
+                    }
+                    
+                } catch (error) {
+                    console.error('Error polling job status:', error);
+                }
+            }, 5000);
+        }
+
+        function cancelResearch() {
+            resetResearch();
+        }
+
+        function resetResearch() {
+            researchState = {
+                stage: 'idle',
+                searchTerm: '',
+                selectedOrg: null,
+                foundProspects: []
+            };
+            
+            document.getElementById('research-org-input').value = '';
+            document.getElementById('research-results').style.display = 'none';
+            document.getElementById('job-progress').style.display = 'none';
+            document.getElementById('research-empty').style.display = 'block';
+        }
+
+        // ========== MODAL ==========
+        function closeModal(event) {
+            if (!event || event.target.classList.contains('modal')) {
+                document.getElementById('detail-modal').classList.remove('show');
+            }
+        }
+
+        // ========== DATA LOADING ==========
+        async function loadData() {
+            log('Starting data load...', 'info');
+            
+            try {
+                // Load each tab
+                for (const [key, tab] of Object.entries(SHEET_TABS)) {
+                    const url = `https://docs.google.com/spreadsheets/d/e/${PUBLISHED_ID}/pub?gid=${tab.gid}&single=true&output=csv`;
+                    log(`Loading ${tab.name}...`, 'info');
+                    
+                    const response = await fetch(url);
+                    const csv = await response.text();
+                    const rows = parseCSV(csv);
+                    
+                    if (key === 'firms') {
+                        toolData.firms = rows.slice(1).map((row, i) => ({
+                            id: `firm_${i}`,
+                            name: row[0] || '',
+                            type: row[1] || 'SFO',
+                            location: row[2] || '',
+                            description: row[3] || '',
+                            aum: parseFloat(row[4]) || 0
+                        })).filter(f => f.name);
+                        log(`Loaded ${toolData.firms.length} firms`, 'success');
+                    }
+                    
+                    if (key === 'prospects') {
+                        toolData.prospects = rows.slice(1).map((row, i) => ({
+                            id: `prospect_${i}`,
+                            name: row[0] || '',
+                            title: row[1] || '',
+                            firm: row[2] || '',
+                            email: row[3] || '',
+                            phone: row[4] || '',
+                            linkedin: row[5] || ''
+                        })).filter(p => p.name);
+                        log(`Loaded ${toolData.prospects.length} prospects`, 'success');
+                    }
+                    
+                    if (key === 'team') {
+                        toolData.teamMembers = rows.slice(1).map((row, i) => ({
+                            id: `team_${i}`,
+                            name: row[0] || '',
+                            role: row[1] || '',
+                            email: row[2] || '',
+                            linkedin: row[4] || ''
+                        })).filter(t => t.name);
+                        log(`Loaded ${toolData.teamMembers.length} team members`, 'success');
+                    }
+                    
+                    if (key === 'mutualConnections') {
+                        toolData.mutualConnections = rows.slice(1).map((row, i) => ({
+                            id: `connector_${i}`,
+                            name: row[0] || '',
+                            title: row[1] || '',
+                            company: row[2] || '',
+                            linkedin: row[5] || ''
+                        })).filter(c => c.name);
+                        log(`Loaded ${toolData.mutualConnections.length} connectors`, 'success');
+                    }
+                }
+                
+                renderAll();
+                hideLoading();
+                
+                // Start polling notifications
+                if (WEBHOOK_URL) {
+                    fetchNotifications();
+                    setInterval(fetchNotifications, 30000); // Poll every 30s
+                }
+                
+            } catch (error) {
+                log(`Error loading data: ${error.message}`, 'error');
+                console.error(error);
+            }
+        }
+
+        function parseCSV(csv) {
+            const lines = csv.split('\n');
+            return lines.map(line => {
+                const result = [];
+                let cell = '';
+                let inQuotes = false;
+                
+                for (let i = 0; i < line.length; i++) {
+                    const char = line[i];
+                    if (char === '"') {
+                        inQuotes = !inQuotes;
+                    } else if (char === ',' && !inQuotes) {
+                        result.push(cell.trim());
+                        cell = '';
+                    } else {
+                        cell += char;
+                    }
+                }
+                result.push(cell.trim());
+                return result;
+            });
+        }
+
+        function hideLoading() {
+            document.getElementById('loading-overlay').style.display = 'none';
+        }
+
+        // ========== RENDER FUNCTIONS ==========
+        function renderAll() {
+            renderProspects();
+            renderConnections();
+            renderFirms();
+            renderTeam();
+            updateStats();
+        }
+
+        function renderProspects() {
+            const tbody = document.getElementById('prospects-table-body');
+            const searchTerm = (document.getElementById('prospects-search')?.value || '').toLowerCase();
+            
+            let filtered = toolData.prospects.filter(p => {
+                if (searchTerm && !p.name.toLowerCase().includes(searchTerm) && 
+                    !p.firm.toLowerCase().includes(searchTerm)) {
+                    return false;
+                }
+                return true;
+            });
+            
+            tbody.innerHTML = filtered.slice(0, 100).map(p => `
+                <tr>
+                    <td><strong>${p.name}</strong></td>
+                    <td>${p.title}</td>
+                    <td>${p.firm}</td>
+                    <td><span class="badge badge-sfo">SFO</span></td>
+                    <td><span class="badge badge-warm">✓ Connected</span></td>
+                </tr>
+            `).join('') || '<tr><td colspan="5" style="text-align: center; padding: 40px; color: #6c757d;">No prospects found</td></tr>';
+        }
+
+        function renderConnections() {
+            const tbody = document.getElementById('connections-table-body');
+            
+            tbody.innerHTML = toolData.mutualConnections.slice(0, 100).map(c => `
+                <tr>
+                    <td><strong>${c.name}</strong></td>
+                    <td>${c.title}</td>
+                    <td>${c.company}</td>
+                    <td>Team</td>
+                    <td>Prospects</td>
+                </tr>
+            `).join('') || '<tr><td colspan="5" style="text-align: center; padding: 40px; color: #6c757d;">No connections found</td></tr>';
+        }
+
+        function renderFirms() {
+            const tbody = document.getElementById('firms-table-body');
+            
+            tbody.innerHTML = toolData.firms.slice(0, 100).map(f => `
+                <tr>
+                    <td><strong>${f.name}</strong></td>
+                    <td><span class="badge badge-${f.type.toLowerCase()}">${f.type}</span></td>
+                    <td>${f.location}</td>
+                    <td>${f.aum ? '$' + f.aum + 'M' : '-'}</td>
+                    <td>-</td>
+                </tr>
+            `).join('') || '<tr><td colspan="5" style="text-align: center; padding: 40px; color: #6c757d;">No firms found</td></tr>';
+        }
+
+        function renderTeam() {
+            const tbody = document.getElementById('team-table-body');
+            
+            tbody.innerHTML = toolData.teamMembers.map(t => `
+                <tr>
+                    <td><strong>${t.name}</strong></td>
+                    <td>${t.role}</td>
+                    <td>-</td>
+                    <td>-</td>
+                </tr>
+            `).join('') || '<tr><td colspan="4" style="text-align: center; padding: 40px; color: #6c757d;">No team members found</td></tr>';
+        }
+
+        function updateStats() {
+            document.getElementById('stat-total').textContent = toolData.prospects.length;
+            document.getElementById('stat-warm').textContent = toolData.prospects.filter(p => p.linkedin).length;
+            document.getElementById('stat-connectors').textContent = toolData.mutualConnections.length;
+        }
+
+        // ========== INIT ==========
+        document.addEventListener('DOMContentLoaded', () => {
+            loadData();
+            
+            // Add filter listeners
+            document.getElementById('prospects-search')?.addEventListener('input', renderProspects);
+        });
+    </script>
+</body>
+</html>
