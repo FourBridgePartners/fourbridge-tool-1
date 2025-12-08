@@ -1,0 +1,1334 @@
+<!-- ========================================
+     FOURBRIDGE RESEARCH FEATURE - REDESIGNED
+     Matches Your Existing Design System
+     ======================================== -->
+
+<!-- 1. ADD THIS CSS TO YOUR <style> SECTION -->
+<style>
+/* ============================================
+   RESEARCH TAB STYLES - MATCHING YOUR DESIGN
+   ============================================ */
+
+.research-view-container {
+    padding: 0;
+    max-width: 100%;
+}
+
+/* Stage Banner - Matches your "STAGE 2 → DISCOVERY" style */
+.research-stage-banner {
+    background: #E7F3FF;
+    border: 1px solid #B8DAFF;
+    border-radius: 8px;
+    padding: 16px 24px;
+    margin: 24px 40px;
+    font-size: 14px;
+    color: #004D9E;
+    font-weight: 600;
+}
+
+.research-stage-banner .stage-title {
+    font-size: 15px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 4px;
+}
+
+.research-stage-banner .stage-subtitle {
+    font-size: 14px;
+    font-weight: 400;
+    color: #0066cc;
+}
+
+/* Search Box - Clean and minimal */
+.research-search-container {
+    padding: 24px 40px;
+}
+
+.research-search-box {
+    background: white;
+    border: 2px solid #e9ecef;
+    border-radius: 8px;
+    padding: 24px;
+}
+
+.search-input-row {
+    display: grid;
+    grid-template-columns: 2fr 1fr auto;
+    gap: 12px;
+    margin-bottom: 12px;
+}
+
+.search-input-row input {
+    padding: 12px 16px;
+    border: 2px solid #dee2e6;
+    border-radius: 6px;
+    font-size: 14px;
+    font-family: inherit;
+}
+
+.search-input-row input:focus {
+    outline: none;
+    border-color: #004D4D;
+}
+
+.search-input-row input::placeholder {
+    color: #adb5bd;
+}
+
+.research-search-btn {
+    background: linear-gradient(135deg, #8B5CF6 0%, #7C3AED 100%);
+    color: white;
+    border: none;
+    padding: 12px 32px;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.2s;
+}
+
+.research-search-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
+}
+
+.research-search-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.search-hint {
+    font-size: 13px;
+    color: #6c757d;
+}
+
+/* Firm Cards - Matches your table row style */
+.research-results-container {
+    padding: 0 40px 40px 40px;
+}
+
+.firm-selection-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.firm-selection-card {
+    background: white;
+    border: 2px solid #e9ecef;
+    border-radius: 8px;
+    padding: 20px 24px;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.firm-selection-card:hover {
+    border-color: #004D4D;
+    box-shadow: 0 2px 8px rgba(0, 77, 77, 0.1);
+}
+
+.firm-card-left {
+    flex: 1;
+}
+
+.firm-card-name {
+    font-size: 16px;
+    font-weight: 700;
+    color: #2d3748;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.firm-card-meta {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 13px;
+    color: #6c757d;
+}
+
+.meta-item {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.firm-type-badge {
+    background: #E7F3FF;
+    color: #004D9E;
+    padding: 4px 10px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.confidence-badge {
+    padding: 4px 10px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.confidence-high {
+    background: #d4edda;
+    color: #155724;
+}
+
+.confidence-medium {
+    background: #fff3cd;
+    color: #856404;
+}
+
+.confidence-low {
+    background: #f8d7da;
+    color: #721c24;
+}
+
+/* Contact Cards - Matches your Stage 2 style exactly */
+.contacts-container {
+    padding: 0 40px 40px 40px;
+}
+
+.company-header-card {
+    background: white;
+    border: 2px solid #e9ecef;
+    border-radius: 8px;
+    padding: 20px 24px;
+    margin-bottom: 24px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.company-icon {
+    width: 48px;
+    height: 48px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+}
+
+.company-info {
+    flex: 1;
+}
+
+.company-name {
+    font-size: 18px;
+    font-weight: 700;
+    color: #2d3748;
+    margin-bottom: 4px;
+}
+
+.company-meta {
+    font-size: 13px;
+    color: #6c757d;
+}
+
+.contacts-section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+}
+
+.contacts-section-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: #495057;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.contact-filters {
+    display: flex;
+    gap: 8px;
+}
+
+.contact-filter-btn {
+    padding: 6px 14px;
+    background: white;
+    border: 1px solid #dee2e6;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 500;
+    color: #495057;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.contact-filter-btn.active {
+    background: #004D4D;
+    color: white;
+    border-color: #004D4D;
+}
+
+.deep-search-btn {
+    background: linear-gradient(135deg, #8B5CF6 0%, #7C3AED 100%);
+    color: white;
+    border: none;
+    padding: 6px 16px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.contacts-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.contact-card {
+    background: white;
+    border: 2px solid #e9ecef;
+    border-radius: 8px;
+    padding: 20px;
+    transition: all 0.2s;
+    position: relative;
+}
+
+.contact-card.selected {
+    border-color: #28a745;
+    background: #f0f9f4;
+}
+
+.contact-card-header {
+    display: flex;
+    align-items: start;
+    gap: 16px;
+}
+
+.contact-checkbox {
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+    margin-top: 4px;
+}
+
+.contact-info {
+    flex: 1;
+}
+
+.contact-name {
+    font-size: 15px;
+    font-weight: 700;
+    color: #2d3748;
+    margin-bottom: 4px;
+}
+
+.contact-title {
+    font-size: 14px;
+    color: #6c757d;
+    margin-bottom: 8px;
+}
+
+.contact-linkedin {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    color: #0077b5;
+    text-decoration: none;
+}
+
+.contact-linkedin:hover {
+    text-decoration: underline;
+}
+
+.linkedin-icon {
+    width: 16px;
+    height: 16px;
+}
+
+.not-found-badge {
+    display: inline-block;
+    background: #fff3cd;
+    color: #856404;
+    padding: 4px 10px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.contact-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.contact-expand-btn {
+    background: transparent;
+    border: 1px solid #dee2e6;
+    color: #6c757d;
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.contact-expand-btn:hover {
+    background: #f8f9fa;
+    border-color: #004D4D;
+    color: #004D4D;
+}
+
+.contact-remove-btn {
+    background: transparent;
+    border: none;
+    color: #dc3545;
+    font-size: 18px;
+    cursor: pointer;
+    padding: 4px 8px;
+    opacity: 0.5;
+    transition: opacity 0.2s;
+}
+
+.contact-remove-btn:hover {
+    opacity: 1;
+}
+
+/* Edit Form - Shown when expanded */
+.contact-edit-form {
+    display: none;
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid #e9ecef;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+.contact-card.expanded .contact-edit-form {
+    display: grid;
+}
+
+.form-field {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.form-field label {
+    font-size: 12px;
+    font-weight: 600;
+    color: #495057;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
+
+.form-field input {
+    padding: 8px 12px;
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+.form-field input:focus {
+    outline: none;
+    border-color: #004D4D;
+}
+
+.form-field.full-width {
+    grid-column: 1 / -1;
+}
+
+.linkedin-input-group {
+    display: flex;
+    gap: 8px;
+}
+
+.linkedin-input-group input {
+    flex: 1;
+}
+
+.verify-linkedin-btn {
+    background: #0077b5;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+.verify-linkedin-btn:hover {
+    background: #006399;
+}
+
+/* Bottom Actions Bar */
+.contacts-footer {
+    margin-top: 24px;
+    padding: 16px 0;
+    border-top: 1px solid #e9ecef;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.selection-count {
+    font-size: 14px;
+    color: #28a745;
+    font-weight: 600;
+}
+
+.action-buttons {
+    display: flex;
+    gap: 12px;
+}
+
+.btn-secondary {
+    background: white;
+    border: 2px solid #dee2e6;
+    color: #495057;
+    padding: 10px 24px;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-secondary:hover {
+    background: #f8f9fa;
+    border-color: #004D4D;
+    color: #004D4D;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+    border: none;
+    color: white;
+    padding: 10px 28px;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+}
+
+.btn-primary:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* Loading States */
+.loading-state {
+    padding: 60px 20px;
+    text-align: center;
+}
+
+.loading-spinner {
+    width: 40px;
+    height: 40px;
+    border: 3px solid rgba(0, 77, 77, 0.1);
+    border-top-color: #004D4D;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin: 0 auto 16px;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+.loading-text {
+    font-size: 16px;
+    font-weight: 600;
+    color: #2d3748;
+    margin-bottom: 8px;
+}
+
+.loading-subtext {
+    font-size: 14px;
+    color: #6c757d;
+}
+
+/* Empty State */
+.empty-state {
+    text-align: center;
+    padding: 60px 20px;
+}
+
+.empty-icon {
+    font-size: 48px;
+    margin-bottom: 16px;
+    opacity: 0.3;
+}
+
+.empty-state h3 {
+    font-size: 18px;
+    font-weight: 600;
+    color: #2d3748;
+    margin-bottom: 8px;
+}
+
+.empty-state p {
+    font-size: 14px;
+    color: #6c757d;
+    margin-bottom: 24px;
+}
+
+/* Success Toast */
+.success-toast {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    background: white;
+    border: 2px solid #28a745;
+    border-radius: 8px;
+    padding: 16px 20px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+    z-index: 10000;
+    max-width: 400px;
+    animation: slideIn 0.3s ease;
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateX(500px);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+.toast-content {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.toast-icon {
+    width: 32px;
+    height: 32px;
+    background: #28a745;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 18px;
+}
+
+.toast-message {
+    flex: 1;
+}
+
+.toast-title {
+    font-size: 15px;
+    font-weight: 600;
+    color: #2d3748;
+    margin-bottom: 4px;
+}
+
+.toast-details {
+    font-size: 13px;
+    color: #6c757d;
+}
+
+.toast-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 12px;
+}
+
+.toast-action-btn {
+    flex: 1;
+    padding: 6px 12px;
+    background: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.toast-action-btn:hover {
+    background: #004D4D;
+    color: white;
+    border-color: #004D4D;
+}
+
+/* API Config - Minimal */
+.api-config-container {
+    padding: 24px 40px;
+}
+
+.api-notice {
+    background: #fff3cd;
+    border: 1px solid #ffc107;
+    border-radius: 8px;
+    padding: 16px 20px;
+    font-size: 14px;
+    color: #856404;
+    text-align: center;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .search-input-row {
+        grid-template-columns: 1fr;
+    }
+    
+    .firm-selection-card {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .contact-edit-form {
+        grid-template-columns: 1fr;
+    }
+    
+    .contacts-footer {
+        flex-direction: column;
+        gap: 12px;
+    }
+}
+</style>
+
+<!-- 2. ADD THIS HTML TO YOUR BODY (inside research-view) -->
+<div id="research-view" class="view">
+    <div class="research-view-container">
+        
+        <!-- Hidden API config check - no UI needed if hardcoded -->
+        <div class="api-config-container" id="api-config-warning" style="display: none;">
+            <div class="api-notice">
+                ⚠️ API key not configured. Contact your administrator.
+            </div>
+        </div>
+
+        <!-- Stage 1: Search -->
+        <div id="research-stage-1">
+            <!-- Search Box -->
+            <div class="research-search-container">
+                <div class="research-search-box">
+                    <div class="search-input-row">
+                        <input 
+                            type="text" 
+                            id="firm-name-input" 
+                            placeholder="Enter firm name (e.g., 'Green Bay Management Company')"
+                            onkeypress="if(event.key==='Enter') startFirmSearch()"
+                        >
+                        <input 
+                            type="text" 
+                            id="location-input" 
+                            placeholder="Location (optional)"
+                            onkeypress="if(event.key==='Enter') startFirmSearch()"
+                        >
+                        <button class="research-search-btn" onclick="startFirmSearch()" id="search-btn">
+                            Search →
+                        </button>
+                    </div>
+                    <div class="search-hint">
+                        💡 Be specific with firm names. Add location for better disambiguation.
+                    </div>
+                </div>
+            </div>
+
+            <!-- Results -->
+            <div class="research-results-container" id="firm-results"></div>
+        </div>
+
+        <!-- Stage 2: Contacts Discovery -->
+        <div id="research-stage-2" style="display: none;">
+            <!-- Stage Banner -->
+            <div class="research-stage-banner">
+                <div class="stage-title">STAGE 2 → DISCOVERY</div>
+                <div class="stage-subtitle" id="stage-2-subtitle">Found 0 contacts</div>
+            </div>
+
+            <!-- Contacts -->
+            <div class="contacts-container">
+                <!-- Company Header -->
+                <div class="company-header-card" id="company-header"></div>
+
+                <!-- Contacts Section -->
+                <div class="contacts-section-header">
+                    <div class="contacts-section-title">
+                        <span>👥</span>
+                        <span>Team Members</span>
+                        <span id="contact-count">(0)</span>
+                    </div>
+                    <div class="contact-filters">
+                        <button class="contact-filter-btn active" onclick="filterContacts('all')">All</button>
+                        <button class="contact-filter-btn" onclick="filterContacts('linkedin')">w/ LinkedIn</button>
+                        <button class="deep-search-btn" onclick="addContactManually()">
+                            + Add Contact
+                        </button>
+                    </div>
+                </div>
+
+                <div class="contacts-list" id="contacts-list"></div>
+
+                <!-- Footer -->
+                <div class="contacts-footer">
+                    <div class="selection-count" id="selection-count">
+                        ✓ 0 contacts with LinkedIn selected for scanning
+                    </div>
+                    <div class="action-buttons">
+                        <button class="btn-secondary" onclick="backToSearch()">
+                            ← Start Over
+                        </button>
+                        <button class="btn-primary" onclick="addToDatabase()" id="add-btn">
+                            Add to Database →
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<!-- 3. ADD THIS JAVASCRIPT -->
+<script>
+// ============================================
+// RESEARCH FEATURE - MATCHING YOUR DESIGN
+// ============================================
+
+// ========== CONFIGURATION ==========
+const RESEARCH_CONFIG = {
+    // TODO: Replace with your actual API key after revoking the exposed one
+    API_KEY: 'YOUR-API-KEY-HERE', // Hardcoded for team use
+    MODEL: 'claude-3-5-haiku-20241022',
+    MAX_TOKENS: 2048
+};
+
+// State
+let researchState = {
+    selectedFirm: null,
+    contacts: [],
+    currentFilter: 'all'
+};
+
+// ========== API CALLS ==========
+
+async function callAnthropicAPI(prompt) {
+    try {
+        const response = await fetch('https://api.anthropic.com/v1/messages', {
+            method: 'POST',
+            headers: {
+                'x-api-key': RESEARCH_CONFIG.API_KEY,
+                'anthropic-version': '2023-06-01',
+                'anthropic-dangerous-direct-browser-access': 'true',
+                'content-type': 'application/json'
+            },
+            body: JSON.stringify({
+                model: RESEARCH_CONFIG.MODEL,
+                max_tokens: RESEARCH_CONFIG.MAX_TOKENS,
+                tools: [{ type: 'web_search_20250305', name: 'web_search' }],
+                messages: [{ role: 'user', content: prompt }]
+            })
+        });
+
+        if (!response.ok) {
+            if (response.status === 401) {
+                throw new Error('Invalid API key. Contact administrator.');
+            }
+            throw new Error(`API error: ${response.status}`);
+        }
+
+        const data = await response.json();
+        return extractJSONFromResponse(data);
+    } catch (error) {
+        console.error('API Error:', error);
+        throw error;
+    }
+}
+
+function extractJSONFromResponse(response) {
+    let text = response.content
+        .filter(block => block.type === 'text')
+        .map(block => block.text)
+        .join('\n');
+    
+    const jsonMatch = text.match(/\[[\s\S]*\]/);
+    if (jsonMatch) {
+        return JSON.parse(jsonMatch[0]);
+    }
+    
+    throw new Error('Could not parse AI response');
+}
+
+// ========== STAGE 1: FIRM SEARCH ==========
+
+async function startFirmSearch() {
+    const firmName = document.getElementById('firm-name-input').value.trim();
+    const location = document.getElementById('location-input').value.trim();
+
+    if (!firmName) {
+        alert('Please enter a firm name');
+        return;
+    }
+
+    const resultsDiv = document.getElementById('firm-results');
+    const searchBtn = document.getElementById('search-btn');
+
+    searchBtn.disabled = true;
+    resultsDiv.innerHTML = `
+        <div class="loading-state">
+            <div class="loading-spinner"></div>
+            <div class="loading-text">Searching for "${firmName}"...</div>
+            <div class="loading-subtext">Checking web sources for matching organizations</div>
+        </div>
+    `;
+
+    try {
+        const prompt = `Research "${firmName}"${location ? ` in ${location}` : ''} and find matching family offices, foundations, or endowments.
+
+Return a JSON array of up to 3 possible matches. For each:
+- name: Full organization name
+- type: "SFO", "MFO", "Foundation", "Endowment"
+- location: City, State format (e.g., "Boston, MA")
+- aum: "$500M", "$1.2B", or "Unknown"
+- description: 2-3 sentence description
+
+Return ONLY valid JSON array. Example:
+[{"name":"X Office","type":"SFO","location":"Boston, MA","aum":"$800M","description":"..."}]`;
+
+        const firms = await callAnthropicAPI(prompt);
+        displayFirmResults(firms);
+    } catch (error) {
+        resultsDiv.innerHTML = `
+            <div class="empty-state">
+                <div class="empty-icon">⚠️</div>
+                <h3>Search Failed</h3>
+                <p>${error.message}</p>
+                <div class="action-buttons">
+                    <button class="btn-primary" onclick="startFirmSearch()">Try Again</button>
+                </div>
+            </div>
+        `;
+    } finally {
+        searchBtn.disabled = false;
+    }
+}
+
+function displayFirmResults(firms) {
+    if (!firms || firms.length === 0) {
+        document.getElementById('firm-results').innerHTML = `
+            <div class="empty-state">
+                <div class="empty-icon">🔍</div>
+                <h3>No Matching Firms Found</h3>
+                <p>Try different search terms or check the spelling</p>
+            </div>
+        `;
+        return;
+    }
+
+    let html = '<div class="firm-selection-list">';
+    
+    firms.forEach((firm, index) => {
+        // Determine confidence
+        let confidence = 'high';
+        if (!firm.aum || firm.aum === 'Unknown') confidence = 'medium';
+        if (!firm.location) confidence = 'low';
+
+        html += `
+            <div class="firm-selection-card" onclick="selectFirm(${index})">
+                <div class="firm-card-left">
+                    <div class="firm-card-name">
+                        ${firm.name}
+                        <span class="firm-type-badge">${firm.type}</span>
+                    </div>
+                    <div class="firm-card-meta">
+                        <span class="meta-item">📍 ${firm.location || 'Location unknown'}</span>
+                        <span class="meta-item">💰 ${firm.aum || 'AUM unknown'}</span>
+                    </div>
+                </div>
+                <span class="confidence-badge confidence-${confidence}">${confidence}</span>
+            </div>
+        `;
+    });
+
+    html += '</div>';
+    
+    document.getElementById('firm-results').innerHTML = html;
+    window.tempFirms = firms;
+}
+
+function selectFirm(index) {
+    researchState.selectedFirm = window.tempFirms[index];
+    findContacts();
+}
+
+// ========== STAGE 2: CONTACTS DISCOVERY ==========
+
+async function findContacts() {
+    const firm = researchState.selectedFirm;
+    
+    // Show stage 2
+    document.getElementById('research-stage-1').style.display = 'none';
+    document.getElementById('research-stage-2').style.display = 'block';
+    
+    // Show loading
+    document.getElementById('stage-2-subtitle').textContent = `Searching for contacts at ${firm.name}...`;
+    document.getElementById('contacts-list').innerHTML = `
+        <div class="loading-state">
+            <div class="loading-spinner"></div>
+            <div class="loading-text">Finding key executives...</div>
+            <div class="loading-subtext">Searching for: CIO, CEO, President, Managing Director</div>
+        </div>
+    `;
+
+    // Update company header
+    document.getElementById('company-header').innerHTML = `
+        <div class="company-icon">🏢</div>
+        <div class="company-info">
+            <div class="company-name">${firm.name}</div>
+            <div class="company-meta">${firm.type} | ${firm.location}</div>
+        </div>
+        <span class="firm-type-badge">${firm.type}</span>
+    `;
+
+    try {
+        const prompt = `Find key executives at "${firm.name}" (${firm.location}).
+
+Search for LinkedIn profiles and return JSON array with:
+- name: Full name
+- title: Job title
+- linkedin: LinkedIn URL (https://linkedin.com/in/...)
+
+Focus on: CIO, CEO, President, Managing Director, Partner, Investment Officer.
+
+Return ONLY valid JSON array. Example:
+[{"name":"John Doe","title":"CIO","linkedin":"https://linkedin.com/in/johndoe"}]`;
+
+        const contacts = await callAnthropicAPI(prompt);
+        
+        researchState.contacts = contacts.map((c, i) => ({
+            ...c,
+            id: `temp_c${i}`,
+            selected: !!c.linkedin, // Auto-select if has LinkedIn
+            firm: firm.name
+        }));
+
+        displayContacts();
+    } catch (error) {
+        document.getElementById('contacts-list').innerHTML = `
+            <div class="empty-state">
+                <div class="empty-icon">👤</div>
+                <h3>No contacts found automatically</h3>
+                <p>${error.message}</p>
+                <div class="action-buttons">
+                    <button class="btn-primary" onclick="addContactManually()">+ Add Contact Manually</button>
+                    <button class="btn-secondary" onclick="backToSearch()">← Start Over</button>
+                </div>
+            </div>
+        `;
+    }
+}
+
+function displayContacts() {
+    const contacts = researchState.contacts;
+    const filtered = filterContactsList(contacts);
+    
+    document.getElementById('stage-2-subtitle').textContent = `Found ${contacts.length} contacts at ${researchState.selectedFirm.name}`;
+    document.getElementById('contact-count').textContent = `(${filtered.length})`;
+
+    if (filtered.length === 0) {
+        document.getElementById('contacts-list').innerHTML = `
+            <div class="empty-state">
+                <div class="empty-icon">👤</div>
+                <h3>No contacts match this filter</h3>
+                <p>Try a different filter or add contacts manually</p>
+            </div>
+        `;
+        return;
+    }
+
+    let html = '';
+    filtered.forEach((contact, index) => {
+        const hasLinkedIn = contact.linkedin && contact.linkedin.includes('linkedin.com');
+        const realIndex = contacts.indexOf(contact);
+
+        html += `
+            <div class="contact-card ${contact.selected ? 'selected' : ''}" id="contact-${realIndex}">
+                <div class="contact-card-header">
+                    <input 
+                        type="checkbox" 
+                        class="contact-checkbox"
+                        ${contact.selected ? 'checked' : ''}
+                        onchange="toggleContact(${realIndex})"
+                    >
+                    <div class="contact-info">
+                        <div class="contact-name">${contact.name}</div>
+                        <div class="contact-title">${contact.title}</div>
+                        ${hasLinkedIn ? `
+                            <a href="${contact.linkedin}" target="_blank" class="contact-linkedin">
+                                🔗 ${contact.linkedin}
+                            </a>
+                        ` : `
+                            <span class="not-found-badge">NOT FOUND IN SEARCH RESULTS</span>
+                        `}
+                    </div>
+                    <div class="contact-actions">
+                        <button class="contact-expand-btn" onclick="toggleExpand(${realIndex})">
+                            Edit Details
+                        </button>
+                        <button class="contact-remove-btn" onclick="removeContact(${realIndex})" title="Remove">
+                            ×
+                        </button>
+                    </div>
+                </div>
+                <div class="contact-edit-form">
+                    <div class="form-field">
+                        <label>Full Name</label>
+                        <input type="text" value="${contact.name}" onchange="updateContact(${realIndex}, 'name', this.value)">
+                    </div>
+                    <div class="form-field">
+                        <label>Title</label>
+                        <input type="text" value="${contact.title}" onchange="updateContact(${realIndex}, 'title', this.value)">
+                    </div>
+                    <div class="form-field full-width">
+                        <label>LinkedIn URL</label>
+                        <div class="linkedin-input-group">
+                            <input 
+                                type="url" 
+                                value="${contact.linkedin || ''}" 
+                                placeholder="https://linkedin.com/in/..."
+                                onchange="updateContact(${realIndex}, 'linkedin', this.value)"
+                            >
+                            ${hasLinkedIn ? `
+                                <button class="verify-linkedin-btn" onclick="window.open('${contact.linkedin}', '_blank')">
+                                    🔗 Verify
+                                </button>
+                            ` : ''}
+                        </div>
+                    </div>
+                    <div class="form-field full-width">
+                        <label>Email (Optional)</label>
+                        <input 
+                            type="email" 
+                            value="${contact.email || ''}" 
+                            placeholder="name@company.com"
+                            onchange="updateContact(${realIndex}, 'email', this.value)"
+                        >
+                    </div>
+                </div>
+            </div>
+        `;
+    });
+
+    document.getElementById('contacts-list').innerHTML = html;
+    updateSelectionCount();
+}
+
+function filterContactsList(contacts) {
+    if (researchState.currentFilter === 'all') return contacts;
+    if (researchState.currentFilter === 'linkedin') {
+        return contacts.filter(c => c.linkedin && c.linkedin.includes('linkedin.com'));
+    }
+    return contacts;
+}
+
+function filterContacts(filter) {
+    researchState.currentFilter = filter;
+    
+    // Update button states
+    document.querySelectorAll('.contact-filter-btn').forEach(btn => {
+        btn.classList.remove('active');
+    });
+    event.target.classList.add('active');
+    
+    displayContacts();
+}
+
+function toggleContact(index) {
+    researchState.contacts[index].selected = !researchState.contacts[index].selected;
+    document.getElementById(`contact-${index}`).classList.toggle('selected');
+    updateSelectionCount();
+}
+
+function toggleExpand(index) {
+    document.getElementById(`contact-${index}`).classList.toggle('expanded');
+}
+
+function updateContact(index, field, value) {
+    researchState.contacts[index][field] = value;
+}
+
+function removeContact(index) {
+    if (confirm('Remove this contact?')) {
+        researchState.contacts.splice(index, 1);
+        displayContacts();
+    }
+}
+
+function addContactManually() {
+    const newContact = {
+        id: `temp_c${researchState.contacts.length}`,
+        name: '',
+        title: '',
+        linkedin: '',
+        email: '',
+        selected: true,
+        firm: researchState.selectedFirm.name
+    };
+    
+    researchState.contacts.push(newContact);
+    displayContacts();
+    
+    // Auto-expand
+    setTimeout(() => {
+        const index = researchState.contacts.length - 1;
+        toggleExpand(index);
+        document.querySelector(`#contact-${index} input[type="text"]`).focus();
+    }, 100);
+}
+
+function updateSelectionCount() {
+    const selected = researchState.contacts.filter(c => c.selected);
+    const withLinkedIn = selected.filter(c => c.linkedin && c.linkedin.includes('linkedin.com'));
+    
+    document.getElementById('selection-count').innerHTML = `
+        ✓ ${withLinkedIn.length} contact${withLinkedIn.length !== 1 ? 's' : ''} with LinkedIn selected for scanning
+    `;
+    
+    document.getElementById('add-btn').disabled = selected.length === 0;
+}
+
+function backToSearch() {
+    document.getElementById('research-stage-1').style.display = 'block';
+    document.getElementById('research-stage-2').style.display = 'none';
+    document.getElementById('firm-name-input').value = '';
+    document.getElementById('location-input').value = '';
+    document.getElementById('firm-results').innerHTML = '';
+    researchState = { selectedFirm: null, contacts: [], currentFilter: 'all' };
+}
+
+// ========== ADD TO DATABASE ==========
+
+function addToDatabase() {
+    const firm = researchState.selectedFirm;
+    const selected = researchState.contacts.filter(c => c.selected);
+
+    if (selected.length === 0) {
+        alert('Please select at least one contact');
+        return;
+    }
+
+    // Check for duplicates
+    const existing = toolData.firms.find(f => 
+        f.name.toLowerCase().includes(firm.name.toLowerCase()) ||
+        firm.name.toLowerCase().includes(f.name.toLowerCase())
+    );
+
+    if (existing && !confirm(`"${firm.name}" may already exist. Add anyway?`)) {
+        return;
+    }
+
+    // Add firm
+    const firmId = `f${toolData.firms.length + 1}`;
+    const newFirm = {
+        id: firmId,
+        name: firm.name,
+        location: firm.location || '',
+        type: firm.type || 'Other',
+        aum: parseAUM(firm.aum),
+        description: firm.description || '',
+        url: '',
+        linkedin: '',
+        prospects: selected.map(c => c.name)
+    };
+    toolData.firms.push(newFirm);
+
+    // Add prospects
+    selected.forEach((contact, index) => {
+        toolData.prospects.push({
+            id: `p${toolData.prospects.length + 1}`,
+            name: contact.name,
+            firm: firm.name,
+            title: contact.title,
+            location: firm.location || '',
+            linkedin: contact.linkedin || '',
+            email: contact.email || '',
+            phone: '',
+            notes: `Added via Research on ${new Date().toLocaleDateString()}`
+        });
+    });
+
+    // Show success
+    showSuccessToast(firm.name, selected.length);
+
+    // Refresh views
+    if (typeof renderFirmsView === 'function') renderFirmsView();
+    if (typeof renderProspectsView === 'function') renderProspectsView();
+
+    // Reset
+    setTimeout(() => backToSearch(), 2000);
+}
+
+function parseAUM(aumString) {
+    if (!aumString || aumString === 'Unknown') return 0;
+    const match = aumString.match(/\$?([\d.]+)\s*([BMK])?/i);
+    if (!match) return 0;
+    let value = parseFloat(match[1]);
+    const unit = match[2] ? match[2].toUpperCase() : '';
+    if (unit === 'B') value *= 1000;
+    else if (unit === 'K') value /= 1000;
+    return Math.round(value);
+}
+
+function showSuccessToast(firmName, count) {
+    const toast = document.createElement('div');
+    toast.className = 'success-toast';
+    toast.innerHTML = `
+        <div class="toast-content">
+            <div class="toast-icon">✓</div>
+            <div class="toast-message">
+                <div class="toast-title">Successfully Added!</div>
+                <div class="toast-details">${firmName} with ${count} contact${count !== 1 ? 's' : ''}</div>
+            </div>
+        </div>
+        <div class="toast-actions">
+            <button class="toast-action-btn" onclick="switchView('firms')">View Firms</button>
+            <button class="toast-action-btn" onclick="this.closest('.success-toast').remove()">Dismiss</button>
+        </div>
+    `;
+    
+    document.body.appendChild(toast);
+    setTimeout(() => toast.remove(), 8000);
+}
+
+// ========== INITIALIZATION ==========
+window.addEventListener('load', function() {
+    // Check if API key is configured
+    if (!RESEARCH_CONFIG.API_KEY || RESEARCH_CONFIG.API_KEY === 'YOUR-API-KEY-HERE') {
+        document.getElementById('api-config-warning').style.display = 'block';
+    }
+});
+</script>
