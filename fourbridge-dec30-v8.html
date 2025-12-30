@@ -1,0 +1,899 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FourBridge Relationship Intelligence System</title>
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f8f9fa;
+            min-height: 100vh;
+        }
+
+        /* Password Gate */
+        .password-gate {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, #004D4D 0%, #006666 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+        }
+
+        .password-gate.hidden {
+            display: none;
+        }
+
+        .password-box {
+            background: white;
+            padding: 40px 50px;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            text-align: center;
+            max-width: 400px;
+            width: 90%;
+        }
+
+        .password-box-logo {
+            font-size: 24px;
+            font-weight: 700;
+            color: #004D4D;
+            margin-bottom: 8px;
+        }
+
+        .password-box-subtitle {
+            color: #6c757d;
+            font-size: 14px;
+            margin-bottom: 30px;
+        }
+
+        .password-input {
+            width: 100%;
+            padding: 14px 18px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            font-size: 16px;
+            margin-bottom: 16px;
+        }
+
+        .password-input:focus {
+            outline: none;
+            border-color: #004D4D;
+        }
+
+        .password-input.error {
+            border-color: #dc3545;
+            animation: shake 0.5s;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+        .password-btn {
+            width: 100%;
+            padding: 14px;
+            background: #004D4D;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .password-btn:hover {
+            background: #003939;
+        }
+
+        .password-error {
+            color: #dc3545;
+            font-size: 13px;
+            margin-top: 12px;
+            display: none;
+        }
+
+        .password-error.show {
+            display: block;
+        }
+
+        .app-content {
+            display: none;
+        }
+
+        .app-content.visible {
+            display: block;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            min-height: 100vh;
+        }
+
+        .header {
+            background: white;
+            color: #1a1a1a;
+            padding: 16px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #e9ecef;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .header-logo img {
+            height: 28px;
+            width: auto;
+        }
+
+        .header-logo-text {
+            font-size: 22px;
+            font-weight: 600;
+            color: #004D4D;
+            letter-spacing: -0.5px;
+        }
+
+        .header h1 {
+            display: none;
+        }
+
+        .header p {
+            display: none;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 4px;
+        }
+
+        .tab {
+            background: transparent;
+            color: #6c757d;
+            border: none;
+            padding: 10px 18px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .tab:hover {
+            background: #f8f9fa;
+            color: #1a1a1a;
+        }
+
+        .tab.active {
+            background: #004D4D;
+            color: white;
+        }
+
+        /* Segmented Control Toggle */
+        .segmented-control {
+            display: inline-flex;
+            background: #e9ecef;
+            border-radius: 10px;
+            padding: 4px;
+            gap: 4px;
+        }
+
+        .segmented-control button {
+            background: transparent;
+            border: none;
+            padding: 10px 24px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            color: #6c757d;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .segmented-control button:hover {
+            color: #004D4D;
+            background: rgba(255,255,255,0.5);
+        }
+
+        .segmented-control button.active {
+            background: white;
+            color: #004D4D;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .segmented-control button .icon {
+            font-size: 16px;
+        }
+
+        /* Loading Screen */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 77, 77, 0.95);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            flex-direction: column;
+            color: white;
+        }
+
+        .loading-spinner {
+            width: 60px;
+            height: 60px;
+            border: 5px solid rgba(95, 196, 184, 0.3);
+            border-top-color: #5FC4B8;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .loading-details {
+            font-size: 14px;
+            opacity: 0.8;
+            max-width: 600px;
+            text-align: center;
+            padding: 0 20px;
+        }
+
+        .loading-log {
+            margin-top: 20px;
+            max-width: 700px;
+            max-height: 300px;
+            overflow-y: auto;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 15px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            text-align: left;
+        }
+
+        .log-entry {
+            margin: 4px 0;
+            padding: 4px 0;
+        }
+
+        .log-success { color: #5FC4B8; }
+        .log-warning { color: #ffc107; }
+        .log-error { color: #ff6b6b; }
+        .log-info { color: #e0e0e0; }
+
+        .view {
+            display: none;
+            padding: 0 40px 40px 40px;
+        }
+
+        .view.active {
+            display: block;
+        }
+
+        #actions-view {
+            padding: 20px 40px 40px 40px;
+        }
+
+        #actions-view .action-center-page {
+            padding: 0;
+        }
+
+        .info-tip {
+            background: #f8f9fa;
+            border-left: 3px solid #004D4D;
+            padding: 12px 16px;
+            border-radius: 4px;
+            margin-bottom: 24px;
+            font-size: 13px;
+            color: #495057;
+        }
+
+        /* Dashboard Summary Card */
+        .dashboard-summary {
+            background: #004D4D;
+            border-radius: 12px;
+            padding: 24px 28px;
+            margin: 24px;
+            color: white;
+        }
+
+        .dashboard-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .dashboard-header h2 {
+            font-size: 18px;
+            font-weight: 600;
+            letter-spacing: -0.3px;
+        }
+
+        .action-list-btn {
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .action-list-btn:hover {
+            background: rgba(255,255,255,0.2);
+        }
+
+        .dashboard-stats {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+
+        .dashboard-stat {
+            text-align: center;
+            padding: 16px 12px;
+            background: rgba(255,255,255,0.08);
+            border-radius: 8px;
+        }
+
+        .dashboard-stat-value {
+            display: block;
+            font-size: 28px;
+            font-weight: 600;
+            color: white;
+        }
+
+        .dashboard-stat-label {
+            font-size: 11px;
+            text-transform: uppercase;
+            opacity: 0.7;
+            letter-spacing: 0.5px;
+            margin-top: 4px;
+        }
+
+        .dashboard-opportunities h3 {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 12px;
+            opacity: 0.7;
+        }
+
+        .top-opportunities {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+        }
+
+        .opportunity-card {
+            background: rgba(255,255,255,0.08);
+            border-radius: 8px;
+            padding: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .opportunity-card:hover {
+            background: rgba(255,255,255,0.15);
+        }
+
+        .opportunity-name {
+            font-weight: 600;
+            font-size: 14px;
+            margin-bottom: 4px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .opportunity-meta {
+            font-size: 12px;
+            opacity: 0.7;
+        }
+
+        .opportunity-score {
+            display: inline-block;
+            background: rgba(255,255,255,0.2);
+            color: white;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 10px;
+            font-weight: 600;
+        }
+
+        /* Priority Contacts Card in Modal */
+        .priority-contacts-card {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 24px;
+        }
+
+        .priority-contacts-header {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #6c757d;
+            margin-bottom: 12px;
+        }
+
+        .priority-contact-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px;
+            background: white;
+            border: 1px solid #e9ecef;
+            border-radius: 6px;
+            margin-bottom: 8px;
+        }
+
+        .priority-contact-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .priority-contact-name {
+            font-weight: 600;
+            font-size: 14px;
+            color: #1a1a1a;
+        }
+
+        .priority-contact-title {
+            font-size: 12px;
+            color: #6c757d;
+        }
+
+        .priority-contact-paths {
+            font-size: 12px;
+            color: #004D4D;
+            font-weight: 500;
+        }
+
+        /* Related Firms Card */
+        .related-firms-card {
+            background: linear-gradient(135deg, #f0f9ff 0%, #e8f5f3 100%);
+            border: 1px solid #b8e0d9;
+            border-radius: 10px;
+            padding: 16px;
+            margin-bottom: 20px;
+        }
+
+        .related-firms-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .related-firms-title {
+            font-weight: 700;
+            font-size: 14px;
+            color: #004D4D;
+        }
+
+        .related-firms-badge {
+            background: #004D4D;
+            color: white;
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .related-firms-stats {
+            font-size: 12px;
+            color: #6c757d;
+            margin-bottom: 12px;
+            display: flex;
+            gap: 6px;
+        }
+
+        .related-firms-list {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .related-firm-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 12px;
+            background: white;
+            border: 1px solid #e0e7ed;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .related-firm-item:hover {
+            border-color: #004D4D;
+            background: #f0fafa;
+        }
+
+        .related-firm-info {
+            flex: 1;
+        }
+
+        .related-firm-name {
+            font-weight: 600;
+            font-size: 13px;
+            color: #004D4D;
+        }
+
+        .related-firm-meta {
+            font-size: 11px;
+            color: #6c757d;
+        }
+
+        .related-firm-count {
+            background: #e8f5f3;
+            color: #004D4D;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        /* Back Navigation Button */
+        .back-nav-btn {
+            background: rgba(255,255,255,0.2);
+            border: 1px solid rgba(255,255,255,0.3);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 4px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .back-nav-btn:hover {
+            background: rgba(255,255,255,0.3);
+        }
+
+        /* Connector Detail Page Styles */
+        .connector-firms-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .connector-firm-item {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 6px;
+            padding: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .connector-firm-item:hover {
+            background: #e8f5f3;
+            border-color: #004D4D;
+        }
+
+        .connector-firm-name {
+            font-weight: 600;
+            font-size: 14px;
+            color: #1a1a1a;
+            margin-bottom: 4px;
+        }
+
+        .connector-firm-meta {
+            font-size: 12px;
+            color: #495057;
+        }
+
+        .connector-firm-via {
+            font-size: 11px;
+            color: #004D4D;
+            margin-top: 4px;
+        }
+
+        /* Prospect Detail Page Styles */
+        .prospect-connectors-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .prospect-connector-item {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 6px;
+            padding: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .prospect-connector-item:hover {
+            background: #e8f5f3;
+            border-color: #004D4D;
+        }
+
+        .prospect-connector-name {
+            font-weight: 600;
+            font-size: 14px;
+            color: #1a1a1a;
+        }
+
+        .prospect-connector-title {
+            font-size: 12px;
+            color: #6c757d;
+        }
+
+        .prospect-connector-via {
+            font-size: 11px;
+            color: #004D4D;
+            text-align: right;
+        }
+
+        .prospect-connector-count {
+            font-size: 11px;
+            color: #6c757d;
+            text-align: right;
+        }
+
+        /* Clickable Names */
+        .clickable-name {
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+
+        .clickable-name:hover {
+            color: #004D4D;
+            text-decoration: underline;
+        }
+
+        /* Connector Detail Page - Redesigned */
+        .connector-stats-row {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .connector-stat-box {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 16px;
+            text-align: center;
+        }
+
+        .connector-stat-value {
+            font-size: 28px;
+            font-weight: 600;
+            color: #004D4D;
+        }
+
+        .connector-stat-label {
+            font-size: 11px;
+            text-transform: uppercase;
+            color: #6c757d;
+            letter-spacing: 0.3px;
+            margin-top: 4px;
+        }
+
+        .connector-meta-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+            padding: 12px 16px;
+            background: #f8f9fa;
+            border-radius: 6px;
+            margin-bottom: 24px;
+            font-size: 13px;
+            color: #495057;
+        }
+
+        .connector-meta-row a {
+            color: #004D4D;
+            text-decoration: none;
+        }
+
+        .connector-meta-row a:hover {
+            text-decoration: underline;
+        }
+
+        /* Connector Firms Grouped List */
+        .connector-firms-grouped {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .connector-firm-group {
+            border: 1px solid #e9ecef;
+            border-radius: 6px;
+            overflow: hidden;
+        }
+
+        .connector-firm-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 16px;
+            background: #f8f9fa;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .connector-firm-header:hover {
+            background: #e8f5f3;
+        }
+
+        .connector-firm-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .connector-firm-expand {
+            color: #6c757d;
+            font-size: 10px;
+            transition: transform 0.2s;
+        }
+
+        .connector-firm-group.expanded .connector-firm-expand {
+            transform: rotate(90deg);
+        }
+
+        .connector-firm-name-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .connector-firm-name {
+            font-weight: 600;
+            font-size: 14px;
+            color: #1a1a1a;
+        }
+
+        .connector-firm-count {
+            font-size: 12px;
+            color: #004D4D;
+            background: #e8f5f3;
+            padding: 2px 8px;
+            border-radius: 10px;
+        }
+
+        .connector-firm-badges {
+            display: flex;
+            gap: 6px;
+            margin-top: 4px;
+        }
+
+        .mini-badge {
+            font-size: 10px;
+            padding: 2px 6px;
+            background: #e9ecef;
+            color: #6c757d;
+            border-radius: 3px;
+        }
+
+        .view-firm-btn {
+            background: transparent;
+            border: 1px solid #004D4D;
+            color: #004D4D;
+            padding: 6px 12px;
+            border-radius: 4px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .view-firm-btn:hover {
+            background: #004D4D;
+            color: white;
+        }
+
+        .connector-firm-contacts {
+            display: none;
+            padding: 0 16px 12px 44px;
+            background: white;
+        }
+
+        .connector-firm-group.expanded .connector-firm-contacts {
+            display: block;
+        }
+
+        .connector-firm-contact {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 12px;
+            border-left: 3px solid #e9ecef;
+            margin-top: 8px;
+            transition: all 0.2s;
+        }
+
+        .connector-firm-contact:hover {
+            background: #f8f9fa;
+            border-left-color: #004D4D;
+        }
+
+        .connector-firm-contact-info {
+            cursor: pointer;
+            flex: 1;
+        }
+
+        .connector-firm-contact-name {
+            font-weight: 500;
+            font-size: 13px;
+            color: #1a1a1a;
+        }
+
+        .connector-firm-contact-title {
+            font-size: 12px;
+            color: #6c757d;
+        }
+
+        /* Enhanced Prospect Connector Items */
+        .prospect-connector-item-enhanced {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 6px;
+            margin-bottom: 8px;
+            overflow: hidden;
+            transition: all 0.2s;
+        }
+
+        .prospect-connector-item-enhanced:hover {
+            border-color: #004D4D;
+        }
+
+        .prospect-connector-main {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 14px 
