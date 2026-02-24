@@ -9201,7 +9201,7 @@
 
             try {
                 log('📋 Loading TAC review data...', 'info');
-                const response = await fetch(REVIEW_APPS_SCRIPT_URL + '?action=reviews', { method: 'GET' });
+                const response = await fetch(REVIEW_APPS_SCRIPT_URL + '?action=reviews', { method: 'GET', redirect: 'follow' });
                 const data = await response.json();
 
                 if (Array.isArray(data)) {
@@ -9266,7 +9266,8 @@
             try {
                 const response = await fetch(REVIEW_APPS_SCRIPT_URL, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    redirect: 'follow',
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
                     body: JSON.stringify({ type: 'review', firmName, status: status || '', reviewer, date })
                 });
                 const result = await response.json();
