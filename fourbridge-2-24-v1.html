@@ -9201,7 +9201,7 @@
 
             try {
                 log('📋 Loading TAC review data...', 'info');
-                const response = await fetch(REVIEW_APPS_SCRIPT_URL + '?action=reviews', { method: 'GET', redirect: 'follow' });
+                const response = await fetch(REVIEW_APPS_SCRIPT_URL + '?action=reviews', { redirect: 'follow' });
                 const data = await response.json();
 
                 if (Array.isArray(data)) {
@@ -9214,7 +9214,7 @@
                     // Also cache in localStorage
                     localStorage.setItem('fourbridge_reviews', JSON.stringify(data));
                     log(`✓ Loaded ${data.length} review statuses`, 'success');
-                } else if (data.error) {
+                } else if (data && data.error) {
                     log(`⚠ Review data error: ${data.error}`, 'warning');
                 }
             } catch (err) {
@@ -9264,21 +9264,21 @@
             }
 
             try {
-                const response = await fetch(REVIEW_APPS_SCRIPT_URL, {
+                await fetch(REVIEW_APPS_SCRIPT_URL, {
                     method: 'POST',
-                    redirect: 'follow',
+                    mode: 'no-cors',
                     headers: { 'Content-Type': 'text/plain;charset=utf-8' },
                     body: JSON.stringify({ type: 'review', firmName, status: status || '', reviewer, date })
                 });
-                const result = await response.json();
 
+                // With no-cors the response is opaque, but the POST still reaches Apps Script
                 if (statusEl) {
                     statusEl.innerHTML = '<span class="tac-review-saved">✓ Saved to Sheet</span>';
                     setTimeout(() => {
                         if (statusEl) statusEl.innerHTML = '';
                     }, 2000);
                 }
-                return result;
+                return { result: 'sent' };
             } catch (err) {
                 console.error('Review save error:', err);
                 if (statusEl) {
